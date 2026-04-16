@@ -87,17 +87,9 @@
     min-height: 100vh;
     display: flex;
     align-items: center;
+    padding: 120px 48px 80px;
     position: relative;
     overflow: hidden;
-  }
-
-  .hero-inner {
-    width: 100%;
-    padding: 120px 80px 80px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 40px;
   }
 
   .hero-bg-grid {
@@ -129,8 +121,7 @@
   .hero-content {
     position: relative;
     z-index: 1;
-    max-width: 600px;
-    flex-shrink: 0;
+    max-width: 800px;
   }
 
   .hero-label {
@@ -221,39 +212,40 @@
   }
 
   .hero-stats {
+    position: absolute;
+    right: 48px;
+    top: 50%;
+    transform: translateY(-50%);
     display: flex;
     flex-direction: column;
     gap: 24px;
     opacity: 0;
     animation: fadeLeft 0.6s 1s forwards;
-    flex-shrink: 0;
   }
 
   .stat-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 14px 0;
-    border-left: 2px solid var(--accent);
-    padding-left: 16px;
-    white-space: nowrap;
+    text-align: right;
+    padding: 16px 0;
+    border-right: 2px solid var(--accent);
+    padding-right: 20px;
   }
 
   .stat-num {
     font-family: var(--font-display);
-    font-size: 26px;
+    font-size: 22px;
     font-weight: 800;
     color: var(--accent);
     line-height: 1;
-    flex-shrink: 0;
+    white-space: nowrap;
   }
 
   .stat-label {
-    font-size: 11px;
+    font-size: 10px;
     color: var(--text2);
     font-family: var(--font-mono);
-    letter-spacing: 0.08em;
+    letter-spacing: 0.05em;
     margin-top: 4px;
+    white-space: nowrap;
   }
 
   /* ===== TERMINAL DEMO ===== */
@@ -775,7 +767,7 @@
   @media (max-width: 768px) {
     nav { padding: 16px 24px; }
     .nav-links { display: none; }
-    .hero-inner { padding: 100px 24px 60px; flex-direction: column; }
+    .hero { padding: 100px 24px 60px; }
     .hero-stats { display: none; }
     .demo-grid { grid-template-columns: 1fr; }
     .process-steps { grid-template-columns: 1fr 1fr; }
@@ -803,36 +795,34 @@
 <section class="hero">
   <div class="hero-bg-grid"></div>
   <div class="hero-glow"></div>
-  <div class="hero-inner">
-    <div class="hero-content">
-      <div class="hero-label">// Automation Engineer × AI Consultant</div>
-      <h1 class="hero-title">
-        「この作業、<br>
-        <span>自動化できますよ。」</span>
-      </h1>
-      <p class="hero-sub">
-        GAS・Python・AIエージェントを組み合わせて、<br>
-        現場の繰り返し業務を仕組みに変えます。<br>
-        ヒアリングから実装・運用まで一気通貫で対応。
-      </p>
-      <div class="hero-cta">
-        <a href="#demo" class="btn-primary">デモを見る</a>
-        <a href="#contact" class="btn-secondary">相談する</a>
-      </div>
+  <div class="hero-content">
+    <div class="hero-label">// Automation Engineer × AI Consultant</div>
+    <h1 class="hero-title">
+      「この作業、<br>
+      <span>自動化できますよ。」</span>
+    </h1>
+    <p class="hero-sub">
+      GAS・Python・AIエージェントを組み合わせて、<br>
+      現場の繰り返し業務を仕組みに変えます。<br>
+      ヒアリングから実装・運用まで一気通貫で対応。
+    </p>
+    <div class="hero-cta">
+      <a href="#demo" class="btn-primary">デモを見る</a>
+      <a href="#contact" class="btn-secondary">相談する</a>
     </div>
-    <div class="hero-stats">
-      <div class="stat-item">
-        <div class="stat-num">¥1億+</div>
-        <div class="stat-label">元事業年商</div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-num">24h</div>
-        <div class="stat-label">返信スピード</div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-num">3日〜</div>
-        <div class="stat-label">納品スピード</div>
-      </div>
+  </div>
+  <div class="hero-stats">
+    <div class="stat-item">
+      <div class="stat-num">¥1億+</div>
+      <div class="stat-label">元事業年商</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">24h</div>
+      <div class="stat-label">返信スピード</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">3日〜</div>
+      <div class="stat-label">納品スピード</div>
     </div>
   </div>
 </section>
