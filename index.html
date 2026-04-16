@@ -87,8 +87,8 @@
     min-height: 100vh;
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    padding: 120px 80px 80px;
+    width: 100%;
+    padding: 120px 0 80px;
     position: relative;
     overflow: hidden;
   }
@@ -123,6 +123,8 @@
     position: relative;
     z-index: 1;
     max-width: 800px;
+    padding-left: 80px;
+    flex-shrink: 0;
   }
 
   .hero-label {
@@ -219,7 +221,8 @@
     opacity: 0;
     animation: fadeLeft 0.6s 1s forwards;
     flex-shrink: 0;
-    padding-right: 60px;
+    margin-left: auto;
+    padding-right: 80px;
   }
 
   .stat-item {
