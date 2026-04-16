@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>蔵内ナレッジアシスタント | 松井酒造 業務FAQ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;600;700&family=IBM+Plex+Mono:wght@300;400;500&family=Noto+Sans+JP:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f0e8;
+    --bg2: #ede7d9;
+    --bg3: #e3dcc8;
+    --surface: #faf7f2;
+    --navy: #1a2744;
+    --navy2: #243358;
+    --accent: #8b1a1a;
+    --accent2: #c4782a;
+    --text: #1a1a2e;
+    --text2: #5a5a7a;
+    --text3: #8a8aaa;
+    --border: rgba(26,39,68,0.1);
+    --border2: rgba(26,39,68,0.06);
+    --shadow: 0 2px 16px rgba(26,39,68,0.08);
+    --font-serif: 'Shippori Mincho', serif;
+    --font-mono: 'IBM Plex Mono', monospace;
+    --font-body: 'Noto Sans JP', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* 和紙テクスチャ */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(26,39,68,0.008) 2px,
+        rgba(26,39,68,0.008) 4px
+      );
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ===== HEADER ===== */
+  header {
+    background: var(--navy);
+    padding: 0 24px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+    z-index: 10;
+    flex-shrink: 0;
+  }
+
+  header::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2), var(--accent));
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .header-icon {
+    width: 32px;
+    height: 32px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+  }
+
+  .header-title {
+    font-family: var(--font-serif);
+    font-size: 16px;
+    font-weight: 600;
+    color: #fff;
+    letter-spacing: 0.08em;
+  }
+
+  .header-sub {
+    font-size: 11px;
+    color: rgba(255,255,255,0.45);
+    font-family: var(--font-mono);
+    letter-spacing: 0.05em;
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .status-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: rgba(255,255,255,0.5);
+    letter-spacing: 0.05em;
+  }
+
+  .status-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #4ade80;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  /* ===== MAIN LAYOUT ===== */
+  .main {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ===== SIDEBAR ===== */
+  .sidebar {
+    width: 260px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    overflow-y: auto;
+  }
+
+  .sidebar-section {
+    padding: 20px 16px 12px;
+    border-bottom: 1px solid var(--border2);
+  }
+
+  .sidebar-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text3);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .category-btn {
+    width: 100%;
+    text-align: left;
+    padding: 10px 12px;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    background: transparent;
+    cursor: pointer;
+    font-family: var(--font-body);
+    font-size: 13px;
+    color: var(--text2);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+    transition: all 0.15s;
+  }
+
+  .category-btn:hover {
+    background: var(--bg2);
+    color: var(--text);
+    border-color: var(--border);
+  }
+
+  .category-btn.active {
+    background: var(--navy);
+    color: #fff;
+    border-color: var(--navy);
+  }
+
+  .category-icon {
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+
+  .quick-questions {
+    padding: 16px;
+    border-bottom: 1px solid var(--border2);
+  }
+
+  .quick-q-btn {
+    width: 100%;
+    text-align: left;
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: transparent;
+    cursor: pointer;
+    font-size: 12px;
+    color: var(--text2);
+    margin-bottom: 6px;
+    line-height: 1.5;
+    transition: all 0.15s;
+    font-family: var(--font-body);
+  }
+
+  .quick-q-btn:hover {
+    background: var(--bg2);
+    border-color: var(--accent2);
+    color: var(--text);
+  }
+
+  .quick-q-btn::before {
+    content: '↗ ';
+    color: var(--accent2);
+    font-size: 10px;
+  }
+
+  /* ===== CHAT AREA ===== */
+  .chat-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .messages::-webkit-scrollbar { width: 4px; }
+  .messages::-webkit-scrollbar-track { background: transparent; }
+  .messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  /* Welcome */
+  .welcome-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px;
+    max-width: 560px;
+    box-shadow: var(--shadow);
+  }
+
+  .welcome-card h2 {
+    font-family: var(--font-serif);
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--navy);
+    margin-bottom: 10px;
+    letter-spacing: 0.05em;
+  }
+
+  .welcome-card p {
+    font-size: 13px;
+    color: var(--text2);
+    line-height: 1.8;
+    margin-bottom: 16px;
+  }
+
+  .coverage-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .coverage-tag {
+    font-size: 11px;
+    padding: 4px 10px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    color: var(--text2);
+    font-family: var(--font-mono);
+  }
+
+  /* Message bubbles */
+  .message {
+    display: flex;
+    gap: 12px;
+    animation: msgIn 0.25s ease;
+  }
+
+  @keyframes msgIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .message.user {
+    flex-direction: row-reverse;
+  }
+
+  .avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+
+  .avatar.ai {
+    background: var(--navy);
+    color: #fff;
+  }
+
+  .avatar.user-av {
+    background: var(--bg3);
+    color: var(--text2);
+  }
+
+  .bubble {
+    max-width: 520px;
+    padding: 14px 18px;
+    border-radius: 12px;
+    font-size: 14px;
+    line-height: 1.8;
+  }
+
+  .message.ai .bubble {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    color: var(--text);
+    border-radius: 4px 12px 12px 12px;
+  }
+
+  .message.user .bubble {
+    background: var(--navy);
+    color: #fff;
+    border-radius: 12px 4px 12px 12px;
+  }
+
+  .bubble-meta {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text3);
+    margin-top: 6px;
+  }
+
+  .message.user .bubble-meta {
+    text-align: right;
+    color: rgba(255,255,255,0.4);
+  }
+
+  /* Source tags */
+  .source-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 10px;
+  }
+
+  .source-tag {
+    font-size: 10px;
+    padding: 3px 8px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    color: var(--text3);
+    font-family: var(--font-mono);
+  }
+
+  /* Typing indicator */
+  .typing {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .typing-dots {
+    display: flex;
+    gap: 4px;
+    padding: 14px 18px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px 12px 12px 12px;
+    box-shadow: var(--shadow);
+  }
+
+  .typing-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--text3);
+    animation: typingBounce 1.2s infinite;
+  }
+
+  .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes typingBounce {
+    0%, 60%, 100% { transform: translateY(0); }
+    30% { transform: translateY(-6px); }
+  }
+
+  /* ===== INPUT AREA ===== */
+  .input-area {
+    padding: 16px 24px 20px;
+    border-top: 1px solid var(--border);
+    background: var(--surface);
+    flex-shrink: 0;
+  }
+
+  .input-wrapper {
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 12px;
+    transition: border 0.2s;
+  }
+
+  .input-wrapper:focus-within {
+    border-color: var(--navy2);
+    box-shadow: 0 0 0 3px rgba(26,39,68,0.06);
+  }
+
+  #userInput {
+    flex: 1;
+    border: none;
+    background: transparent;
+    font-family: var(--font-body);
+    font-size: 14px;
+    color: var(--text);
+    resize: none;
+    outline: none;
+    max-height: 120px;
+    line-height: 1.6;
+  }
+
+  #userInput::placeholder { color: var(--text3); }
+
+  .send-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: var(--navy);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.15s;
+    color: #fff;
+    font-size: 14px;
+  }
+
+  .send-btn:hover { background: var(--navy2); transform: translateY(-1px); }
+  .send-btn:disabled { background: var(--bg3); cursor: not-allowed; transform: none; }
+
+  .input-hint {
+    font-size: 11px;
+    color: var(--text3);
+    font-family: var(--font-mono);
+    margin-top: 8px;
+    text-align: center;
+  }
+
+  /* ===== SCROLLBAR ===== */
+  .sidebar::-webkit-scrollbar { width: 3px; }
+  .sidebar::-webkit-scrollbar-thumb { background: var(--border); }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 640px) {
+    .sidebar { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="header-left">
+    <div class="header-icon">🍶</div>
+    <div>
+      <div class="header-title">蔵内ナレッジアシスタント</div>
+      <div class="header-sub">業務FAQ自動対応エージェント — 酒造・食品製造業Ver</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="status-badge">
+      <div class="status-dot"></div>
+      AI稼働中
+    </div>
+  </div>
+</header>
+
+<div class="main">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">カテゴリ</div>
+      <button class="category-btn active" onclick="setCategory('all')">
+        <span class="category-icon">📋</span>すべて
+      </button>
+      <button class="category-btn" onclick="setCategory('manual')">
+        <span class="category-icon">📄</span>手順書・規格書
+      </button>
+      <button class="category-btn" onclick="setCategory('order')">
+        <span class="category-icon">📦</span>原料・発注先
+      </button>
+      <button class="category-btn" onclick="setCategory('quality')">
+        <span class="category-icon">⚠️</span>品質異常・初動
+      </button>
+    </div>
+
+    <div class="quick-questions" id="quickQuestions">
+      <div class="sidebar-label">よくある質問</div>
+      <!-- JS で動的生成 -->
+    </div>
+  </aside>
+
+  <!-- CHAT -->
+  <div class="chat-area">
+    <div class="messages" id="messages">
+
+      <!-- Welcome -->
+      <div class="welcome-card">
+        <h2>🍶 蔵内ナレッジアシスタント</h2>
+        <p>
+          製造現場でよく聞かれる質問に、AIがすぐに答えます。<br>
+          手順書の場所・発注先・品質異常時の初動など、<br>
+          担当者に聞く前にまずここで確認してみてください。
+        </p>
+        <div class="coverage-tags">
+          <span class="coverage-tag">手順書検索</span>
+          <span class="coverage-tag">発注先照会</span>
+          <span class="coverage-tag">品質異常対応</span>
+          <span class="coverage-tag">ロット管理</span>
+          <span class="coverage-tag">洗浄・衛生ルール</span>
+          <span class="coverage-tag">設備トラブル</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- INPUT -->
+    <div class="input-area">
+      <div class="input-wrapper">
+        <textarea id="userInput" rows="1" placeholder="例：火入れの手順書はどこにありますか？" oninput="autoResize(this)" onkeydown="handleKey(event)"></textarea>
+        <button class="send-btn" id="sendBtn" onclick="sendMessage()">↑</button>
+      </div>
+      <div class="input-hint">Enter で送信 / Shift+Enter で改行 — 業種に合わせてFAQデータを差し替え可能</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ===== FAQ データベース =====
+const FAQ_DB = {
+  manual: [
+    {
+      q: "火入れの標準条件・手順書はどこですか",
+      category: "手順書",
+      location: "共有フォルダ > 製造管理 > 工程別手順書 > 05_火入れ工程_v3.2.pdf",
+      detail: "最終更新：2025年11月。火入れ温度は65±1℃、保持時間30秒が標準条件です。季節品は別ファイル（05_火入れ工程_季節品_v2.pdf）を参照してください。",
+      source: "製造管理フォルダ"
+    },
+    {
+      q: "洗浄・CIPの条件表はどこにありますか",
+      category: "手順書",
+      location: "共有フォルダ > 衛生管理 > CIP条件表_v4.xlsx",
+      detail: "設備ごとにシートが分かれています。タンク洗浄は「タンク」シート、配管は「配管」シートを参照。使用薬剤の濃度と接触時間が記載されています。",
+      source: "衛生管理フォルダ"
+    },
+    {
+      q: "製造日報の保存先・様式はどれですか",
+      category: "帳票",
+      location: "共有フォルダ > 記録・帳票 > 日報 > 製造日報_様式A.xlsx",
+      detail: "記入後は当日中に同フォルダ内「提出済み」に移動してください。承認者は製造主任です。電子承認システム（Gスプレッドシート）に移行予定：2026年Q2。",
+      source: "記録・帳票フォルダ"
+    },
+    {
+      q: "充填手順の最新版はどれですか",
+      category: "手順書",
+      location: "共有フォルダ > 製造管理 > 工程別手順書 > 07_充填工程_v2.1.pdf",
+      detail: "2025年9月に充填温度条件が変更されました。旧版（v2.0以前）は使用禁止です。充填温度：5℃以下（冷蔵品）、常温品は別手順書参照。",
+      source: "製造管理フォルダ"
+    },
+    {
+      q: "酒母工程の基準値はどこで確認できますか",
+      category: "手順書",
+      location: "共有フォルダ > 醸造管理 > 酒母管理基準書_v5.pdf",
+      detail: "品温管理・糖度・酸度の基準値が記載されています。仕込み別の目標値は「仕込み配合表」フォルダの各ロットファイルを参照してください。",
+      source: "醸造管理フォルダ"
+    }
+  ],
+  order: [
+    {
+      q: "麹菌・麹の仕入先はどこですか",
+      category: "発注先",
+      supplier: "秋田今野商店（担当：田中様）",
+      contact: "0120-XXX-XXX / tanaka@akita-konno.co.jp",
+      detail: "発注はメールが基本。リードタイム：通常3営業日。最小発注単位：1kg。代替品：ビオック社製（品質保証確認済み、緊急時のみ）。",
+      source: "仕入先マスタ"
+    },
+    {
+      q: "瓶・ラベルの発注先はどこですか",
+      category: "発注先",
+      supplier: "瓶：東洋ガラス㈱（担当：鈴木様） / ラベル：大阪印刷㈱（担当：森様）",
+      contact: "瓶：06-XXXX-XXXX / ラベル：0120-YYY-YYY",
+      detail: "瓶とラベルは発注先が別です。混同注意。ラベルは色校正に追加3営業日かかります。急ぎの場合は必ず電話で連絡を。",
+      source: "仕入先マスタ"
+    },
+    {
+      q: "米・酒米の発注先・担当者を教えてください",
+      category: "発注先",
+      supplier: "農業法人 田んぼの里（担当：村上様）",
+      contact: "0858-XX-XXXX（直通）",
+      detail: "年間契約のため追加発注は要相談。収穫時期（10〜11月）は担当者が繁忙のためFAX推奨。発注書様式：共有フォルダ > 発注書 > 米発注書.docx",
+      source: "仕入先マスタ"
+    },
+    {
+      q: "副原料（調味料・添加物）の発注先はどこですか",
+      category: "発注先",
+      supplier: "長谷川商事㈱（担当：岡田様）",
+      contact: "052-XXX-XXXX / okada@hasegawa-sh.co.jp",
+      detail: "品目ごとにメーカーが異なる場合は同社に一括発注で対応可。詳細は「副原料一覧表.xlsx」の発注先列を参照。緊急時はA社（直取引）への連絡も可。",
+      source: "仕入先マスタ"
+    },
+    {
+      q: "設備・資材の修理・保守連絡先はどこですか",
+      category: "発注先",
+      supplier: "充填機：㈱タニエース / 冷却設備：三菱電機サービス㈱",
+      contact: "充填機：0120-AAA-AAA（24h対応） / 冷却：0120-BBB-BBB（平日9-17時）",
+      detail: "各設備の型番・シリアルNo.は「設備台帳.xlsx」に記載。修理依頼前に必ず型番を手元に。緊急時は製造主任に報告後、各社へ連絡してください。",
+      source: "設備台帳・仕入先マスタ"
+    }
+  ],
+  quality: [
+    {
+      q: "異物を発見したときの初動手順を教えてください",
+      category: "品質異常",
+      steps: ["①その場で作業を止める", "②異物が混入している製品・原料を隔離（保留ラベルを貼付）", "③写真を撮影（3枚以上：全体・近影・スケール付き）", "④品質保証部に即時報告（内線XX or 担当者携帯）", "⑤「異物発見報告書.xlsx」に記録"],
+      contact: "品質保証部 直通：内線XX / 担当者携帯：090-XXXX-XXXX",
+      detail: "保留ラベルは製造事務所のキャビネットにあります。「作業継続していいか」の判断は品質保証部が行います。自己判断で廃棄しないこと。",
+      source: "品質管理規程"
+    },
+    {
+      q: "製品の色・外観に異常があった場合はどうすればいいですか",
+      category: "品質異常",
+      steps: ["①異常品を通常ラインから分離", "②程度を確認（基準値：製品規格書参照）", "③軽微な色ブレ→製造記録に記載して品質保証に報告", "④明らかな異常→保留措置＋品質保証部に即報告"],
+      contact: "品質保証部 内線XX",
+      detail: "「軽微」の基準は製品規格書の許容範囲表を参照。迷ったら保留にして品質保証部に判断を仰いでください。",
+      source: "品質管理規程"
+    },
+    {
+      q: "品質異常時の報告先・連絡順を教えてください",
+      category: "品質異常",
+      steps: ["1次報告：直属の班長・工程リーダーへ口頭報告", "2次報告：品質保証部（内線XX）へ報告", "3次報告：重大異常の場合は製造部長まで報告"],
+      contact: "品質保証部：内線XX / 製造部長：内線YY",
+      detail: "「重大異常」の定義：①異物混入、②規格外製品の出荷可能性、③食品衛生法抵触のおそれ。夜間・休日は緊急連絡網（詰所に掲示）を参照。",
+      source: "品質管理規程・緊急連絡網"
+    },
+    {
+      q: "賞味期限の近い原料から使うルールはどうなっていますか",
+      category: "ロット管理",
+      steps: ["①FIFO（先入先出）が原則", "②同ロット複数在庫の場合は入荷日が早いものから使用", "③使用前にロット番号・賞味期限を「原料使用記録.xlsx」に記録"],
+      detail: "賞味期限が切れた原料は必ず品質保証部に報告。廃棄は担当者の独断では行わないこと。保管場所に「使用順」の表示がある場合はそれに従ってください。",
+      source: "在庫管理規程"
+    },
+    {
+      q: "設備エラーコードが出たときの初動はどうすればいいですか",
+      category: "設備トラブル",
+      steps: ["①エラーコードを控える（写真推奨）", "②「設備別エラーコード対応表.xlsx」で対応手順を確認", "③対応手順に従い一次対処", "④解決しない場合：製造主任に報告 → 必要に応じて保守業者へ連絡"],
+      detail: "設備別エラーコード対応表：共有フォルダ > 設備管理 > エラーコード対応表.xlsx。各設備シートに対応手順・保守連絡先が記載されています。自己判断での分解・修理は禁止。",
+      source: "設備管理フォルダ"
+    }
+  ]
+};
+
+// 全FAQをフラット化
+const ALL_FAQ = [...FAQ_DB.manual, ...FAQ_DB.order, ...FAQ_DB.quality];
+
+// クイック質問データ
+const QUICK_QUESTIONS = {
+  all: [
+    "火入れの手順書はどこですか？",
+    "麹の仕入先を教えてください",
+    "異物を発見しました。どうすればいいですか？",
+    "製造日報の様式はどれですか？",
+    "賞味期限近い原料の使用ルールは？"
+  ],
+  manual: [
+    "火入れの標準条件を教えてください",
+    "CIP洗浄の条件表はどこですか？",
+    "充填手順の最新版はどれですか？",
+    "製造日報はどこに保存しますか？",
+    "酒母工程の基準値を教えてください"
+  ],
+  order: [
+    "麹菌の仕入先はどこですか？",
+    "瓶とラベルの発注先は違いますか？",
+    "酒米の発注先・担当者を教えてください",
+    "副原料の発注先はどこですか？",
+    "設備の修理連絡先を教えてください"
+  ],
+  quality: [
+    "異物を発見したときの手順は？",
+    "品質異常の報告先を教えてください",
+    "色ブレが出た場合の対応は？",
+    "先入先出のルールを教えてください",
+    "設備エラーが出たときの初動は？"
+  ]
+};
+
+let currentCategory = 'all';
+
+// カテゴリ切り替え
+function setCategory(cat) {
+  currentCategory = cat;
+  document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  renderQuickQuestions(cat);
+}
+
+// クイック質問を描画
+function renderQuickQuestions(cat) {
+  const container = document.getElementById('quickQuestions');
+  const qs = QUICK_QUESTIONS[cat] || QUICK_QUESTIONS.all;
+  container.innerHTML = '<div class="sidebar-label">よくある質問</div>' +
+    qs.map(q => `<button class="quick-q-btn" onclick="quickAsk('${q.replace(/'/g, "\\'")}')">${q}</button>`).join('');
+}
+
+function quickAsk(q) {
+  document.getElementById('userInput').value = q;
+  sendMessage();
+}
+
+// メッセージ送信
+async function sendMessage() {
+  const input = document.getElementById('userInput');
+  const msg = input.value.trim();
+  if (!msg) return;
+
+  input.value = '';
+  input.style.height = 'auto';
+  document.getElementById('sendBtn').disabled = true;
+
+  // ユーザーメッセージ表示
+  appendMessage('user', msg);
+
+  // タイピングインジケーター
+  const typingId = showTyping();
+
+  try {
+    const reply = await callClaude(msg);
+    removeTyping(typingId);
+    appendAIMessage(reply, msg);
+  } catch (e) {
+    removeTyping(typingId);
+    appendAIMessage(generateLocalAnswer(msg), msg);
+  }
+
+  document.getElementById('sendBtn').disabled = false;
+}
+
+// Claude API呼び出し
+async function callClaude(userMsg) {
+  const systemPrompt = `あなたは酒造・食品製造業向けの社内ナレッジアシスタントです。
+以下のFAQデータベースをもとに、現場スタッフの質問に答えてください。
+
+【FAQデータベース】
+${JSON.stringify(ALL_FAQ, null, 2)}
+
+【回答ルール】
+- 該当するFAQがある場合：場所・担当者・手順を具体的に答える
+- 手順がある場合：番号付きリストで分かりやすく
+- 「問い合わせ先」がある場合は必ず記載
+- 不明な場合：「このご質問は担当者への確認が必要です。品質保証部（内線XX）または製造主任にお問い合わせください」と答える
+- 回答は簡潔に。200字以内を目安に
+- 絵文字は使わない（業務用なので）
+- 敬語・丁寧語で回答`;
+
+  const res = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: "claude-sonnet-4-20250514",
+      max_tokens: 600,
+      system: systemPrompt,
+      messages: [{ role: "user", content: userMsg }]
+    })
+  });
+
+  const data = await res.json();
+  return data.content?.[0]?.text || "回答を生成できませんでした。";
+}
+
+// ローカルフォールバック（API不可時）
+function generateLocalAnswer(msg) {
+  const lower = msg.toLowerCase();
+  for (const item of ALL_FAQ) {
+    const keywords = item.q.toLowerCase().split(/[・。、\s]+/);
+    if (keywords.some(k => k.length > 2 && lower.includes(k))) {
+      let answer = '';
+      if (item.location) answer += `📁 場所：${item.location}\n\n`;
+      if (item.supplier) answer += `🏢 発注先：${item.supplier}\n連絡先：${item.contact}\n\n`;
+      if (item.steps) answer += `手順：\n${item.steps.join('\n')}\n\n`;
+      if (item.detail) answer += item.detail;
+      return answer || item.detail;
+    }
+  }
+  return "このご質問は担当者への確認が必要です。品質保証部（内線XX）または製造主任にお問い合わせください。\n\n※ デモ版のため、FAQに登録されていない質問はシステムが回答できない場合があります。";
+}
+
+// メッセージ追加
+function appendMessage(role, text) {
+  const messages = document.getElementById('messages');
+  const div = document.createElement('div');
+  div.className = `message ${role}`;
+  const now = new Date().toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' });
+
+  if (role === 'user') {
+    div.innerHTML = `
+      <div class="avatar user-av">👤</div>
+      <div>
+        <div class="bubble">${escapeHtml(text)}</div>
+        <div class="bubble-meta">${now}</div>
+      </div>`;
+  }
+  messages.appendChild(div);
+  messages.scrollTop = messages.scrollHeight;
+}
+
+function appendAIMessage(text, userMsg) {
+  const messages = document.getElementById('messages');
+  const div = document.createElement('div');
+  div.className = 'message ai';
+  const now = new Date().toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' });
+
+  // 関連ソースを探す
+  const sources = findSources(userMsg);
+
+  div.innerHTML = `
+    <div class="avatar ai">🍶</div>
+    <div>
+      <div class="bubble">${formatAnswer(text)}</div>
+      ${sources.length ? `<div class="source-tags">${sources.map(s => `<span class="source-tag">📂 ${s}</span>`).join('')}</div>` : ''}
+      <div class="bubble-meta">${now} — AI回答（業種別FAQデータ参照）</div>
+    </div>`;
+
+  messages.appendChild(div);
+  messages.scrollTop = messages.scrollHeight;
+}
+
+function findSources(msg) {
+  const lower = msg.toLowerCase();
+  const sources = new Set();
+  for (const item of ALL_FAQ) {
+    const keywords = item.q.toLowerCase().split(/[・。、\s]+/);
+    if (keywords.some(k => k.length > 2 && lower.includes(k))) {
+      if (item.source) sources.add(item.source);
+    }
+  }
+  return [...sources].slice(0, 2);
+}
+
+function formatAnswer(text) {
+  return escapeHtml(text)
+    .replace(/\n/g, '<br>')
+    .replace(/①|②|③|④|⑤/g, m => `<strong>${m}</strong>`);
+}
+
+function escapeHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// タイピング表示
+function showTyping() {
+  const messages = document.getElementById('messages');
+  const id = 'typing-' + Date.now();
+  const div = document.createElement('div');
+  div.className = 'typing';
+  div.id = id;
+  div.innerHTML = `
+    <div class="avatar ai">🍶</div>
+    <div class="typing-dots">
+      <div class="typing-dot"></div>
+      <div class="typing-dot"></div>
+      <div class="typing-dot"></div>
+    </div>`;
+  messages.appendChild(div);
+  messages.scrollTop = messages.scrollHeight;
+  return id;
+}
+
+function removeTyping(id) {
+  const el = document.getElementById(id);
+  if (el) el.remove();
+}
+
+// テキストエリア自動リサイズ
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+}
+
+// Enter送信
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+}
+
+// 初期化
+renderQuickQuestions('all');
+</script>
+</body>
+</html>
