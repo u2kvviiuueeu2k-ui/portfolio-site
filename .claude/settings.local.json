@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/Program Files/**)",
+      "Read(//c/Users/mizut/**)",
+      "Bash(GH_CONFIG_DIR=\"C:/Users/mizut/AppData/Roaming/GitHub CLI\" \"/c/Program Files/GitHub CLI/gh.exe\" repo create portfolio-site --public --push --source=.)",
+      "Bash(\"/c/Program Files/GitHub CLI/gh.exe\" repo create portfolio-site --public --push --source=.)"
+    ]
+  }
+}
