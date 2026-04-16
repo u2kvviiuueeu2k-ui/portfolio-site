@@ -87,10 +87,17 @@
     min-height: 100vh;
     display: flex;
     align-items: center;
-    width: 100%;
-    padding: 120px 0 80px;
     position: relative;
     overflow: hidden;
+  }
+
+  .hero-inner {
+    width: 100%;
+    padding: 120px 80px 80px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 40px;
   }
 
   .hero-bg-grid {
@@ -122,8 +129,7 @@
   .hero-content {
     position: relative;
     z-index: 1;
-    max-width: 800px;
-    padding-left: 80px;
+    max-width: 600px;
     flex-shrink: 0;
   }
 
@@ -221,8 +227,6 @@
     opacity: 0;
     animation: fadeLeft 0.6s 1s forwards;
     flex-shrink: 0;
-    margin-left: auto;
-    padding-right: 80px;
   }
 
   .stat-item {
@@ -767,7 +771,7 @@
   @media (max-width: 768px) {
     nav { padding: 16px 24px; }
     .nav-links { display: none; }
-    .hero { padding: 100px 24px 60px; }
+    .hero-inner { padding: 100px 24px 60px; flex-direction: column; }
     .hero-stats { display: none; }
     .demo-grid { grid-template-columns: 1fr; }
     .process-steps { grid-template-columns: 1fr 1fr; }
@@ -795,34 +799,36 @@
 <section class="hero">
   <div class="hero-bg-grid"></div>
   <div class="hero-glow"></div>
-  <div class="hero-content">
-    <div class="hero-label">// Automation Engineer × AI Consultant</div>
-    <h1 class="hero-title">
-      「この作業、<br>
-      <span>自動化できますよ。」</span>
-    </h1>
-    <p class="hero-sub">
-      GAS・Python・AIエージェントを組み合わせて、<br>
-      現場の繰り返し業務を仕組みに変えます。<br>
-      ヒアリングから実装・運用まで一気通貫で対応。
-    </p>
-    <div class="hero-cta">
-      <a href="#demo" class="btn-primary">デモを見る</a>
-      <a href="#contact" class="btn-secondary">相談する</a>
+  <div class="hero-inner">
+    <div class="hero-content">
+      <div class="hero-label">// Automation Engineer × AI Consultant</div>
+      <h1 class="hero-title">
+        「この作業、<br>
+        <span>自動化できますよ。」</span>
+      </h1>
+      <p class="hero-sub">
+        GAS・Python・AIエージェントを組み合わせて、<br>
+        現場の繰り返し業務を仕組みに変えます。<br>
+        ヒアリングから実装・運用まで一気通貫で対応。
+      </p>
+      <div class="hero-cta">
+        <a href="#demo" class="btn-primary">デモを見る</a>
+        <a href="#contact" class="btn-secondary">相談する</a>
+      </div>
     </div>
-  </div>
-  <div class="hero-stats">
-    <div class="stat-item">
-      <div class="stat-num">¥1億+</div>
-      <div class="stat-label">元事業年商</div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-num">24h</div>
-      <div class="stat-label">返信スピード</div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-num">3日〜</div>
-      <div class="stat-label">納品スピード</div>
+    <div class="hero-stats">
+      <div class="stat-item">
+        <div class="stat-num">¥1億+</div>
+        <div class="stat-label">元事業年商</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">24h</div>
+        <div class="stat-label">返信スピード</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">3日〜</div>
+        <div class="stat-label">納品スピード</div>
+      </div>
     </div>
   </div>
 </section>
