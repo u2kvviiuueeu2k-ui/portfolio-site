@@ -837,15 +837,15 @@
   </div>
   <div class="hero-stats">
     <div class="stat-item">
-      <div class="stat-num">0億+</div>
-      <div class="stat-label">元事業年商</div>
+      <div class="stat-num" data-final="1億+">—</div>
+      <div class="stat-label">事業年商</div>
     </div>
     <div class="stat-item">
-      <div class="stat-num">24h</div>
+      <div class="stat-num" data-final="24h以内">—</div>
       <div class="stat-label">返信スピード</div>
     </div>
     <div class="stat-item">
-      <div class="stat-num">3日〜</div>
+      <div class="stat-num" data-final="最短3日">—</div>
       <div class="stat-label">納品スピード</div>
     </div>
   </div>
@@ -1194,27 +1194,37 @@ async function runDemo() {
   btn.disabled = false;
 }
 
-// Count-up animation
-function countUp(el, target, suffix, duration) {
-  let start = 0;
-  const step = target / (duration / 16);
+// Scramble animation
+function scramble(el) {
+  const final = el.dataset.final;
+  const chars = '0123456789!@#$%&';
+  const duration = 600;
+  const interval = 40;
+  let elapsed = 0;
   const timer = setInterval(() => {
-    start += step;
-    if (start >= target) {
-      el.textContent = target + suffix;
-      clearInterval(timer);
-    } else {
-      el.textContent = Math.floor(start) + suffix;
+    elapsed += interval;
+    const progress = elapsed / duration;
+    let result = '';
+    for (let i = 0; i < final.length; i++) {
+      if (progress > i / final.length) {
+        result += final[i];
+      } else {
+        result += chars[Math.floor(Math.random() * chars.length)];
+      }
     }
-  }, 16);
+    el.textContent = result;
+    if (elapsed >= duration) {
+      el.textContent = final;
+      clearInterval(timer);
+    }
+  }, interval);
 }
 
 window.addEventListener('load', () => {
   setTimeout(() => {
-    const nums = document.querySelectorAll('.stat-num');
-    if (nums[0]) countUp(nums[0], 1, '億+', 1200);
-    if (nums[1]) countUp(nums[1], 24, 'h', 1000);
-    if (nums[2]) countUp(nums[2], 3, '日〜', 800);
+    document.querySelectorAll('.stat-num').forEach((el, i) => {
+      setTimeout(() => scramble(el), i * 150);
+    });
   }, 1200);
 });
 </script>
