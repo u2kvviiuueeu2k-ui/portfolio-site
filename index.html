@@ -87,7 +87,8 @@
     min-height: 100vh;
     display: flex;
     align-items: center;
-    padding: 120px 48px 80px;
+    justify-content: space-between;
+    padding: 120px 80px 80px;
     position: relative;
     overflow: hidden;
   }
@@ -212,16 +213,12 @@
   }
 
   .hero-stats {
-    position: absolute;
-    right: 80px;
-    top: 50%;
-    transform: translateY(-50%);
     display: flex;
     flex-direction: column;
     gap: 24px;
     opacity: 0;
     animation: fadeLeft 0.6s 1s forwards;
-    min-width: 120px;
+    flex-shrink: 0;
   }
 
   .stat-item {
