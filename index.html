@@ -230,18 +230,22 @@
   }
 
   .stat-item {
-    text-align: right;
-    padding: 16px 20px 16px 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 0;
     border-left: 2px solid var(--accent);
+    padding-left: 16px;
     white-space: nowrap;
   }
 
   .stat-num {
     font-family: var(--font-display);
-    font-size: 28px;
+    font-size: 26px;
     font-weight: 800;
     color: var(--accent);
     line-height: 1;
+    flex-shrink: 0;
   }
 
   .stat-label {
