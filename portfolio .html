@@ -1,0 +1,1172 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ゆっけ | 業務自動化エンジニア</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=IBM+Plex+Mono:wght@300;400;500&family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #08080f;
+    --bg2: #0f0f1a;
+    --bg3: #161625;
+    --accent: #00e5b0;
+    --accent2: #0099ff;
+    --text: #e2e2f0;
+    --text2: #8888aa;
+    --border: rgba(255,255,255,0.07);
+    --font-display: 'Syne', sans-serif;
+    --font-mono: 'IBM Plex Mono', monospace;
+    --font-body: 'Noto Sans JP', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* ===== NOISE OVERLAY ===== */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.4;
+  }
+
+  /* ===== NAV ===== */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 20px 48px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(8,8,15,0.8);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .nav-logo {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 32px;
+    list-style: none;
+  }
+
+  .nav-links a {
+    color: var(--text2);
+    text-decoration: none;
+    font-size: 13px;
+    font-family: var(--font-mono);
+    letter-spacing: 0.05em;
+    transition: color 0.2s;
+  }
+
+  .nav-links a:hover { color: var(--accent); }
+
+  /* ===== HERO ===== */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    padding: 120px 48px 80px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-bg-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,229,176,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,229,176,0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+    animation: gridPan 20s linear infinite;
+  }
+
+  @keyframes gridPan {
+    from { background-position: 0 0; }
+    to { background-position: 60px 60px; }
+  }
+
+  .hero-glow {
+    position: absolute;
+    width: 600px;
+    height: 600px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0,229,176,0.08) 0%, transparent 70%);
+    top: -100px;
+    right: -100px;
+    pointer-events: none;
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 1;
+    max-width: 800px;
+  }
+
+  .hero-label {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--accent);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 24px;
+    opacity: 0;
+    animation: fadeUp 0.6s 0.2s forwards;
+  }
+
+  .hero-title {
+    font-family: var(--font-display);
+    font-size: clamp(42px, 6vw, 80px);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    margin-bottom: 24px;
+    opacity: 0;
+    animation: fadeUp 0.6s 0.4s forwards;
+  }
+
+  .hero-title span {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero-sub {
+    font-size: 16px;
+    color: var(--text2);
+    max-width: 520px;
+    margin-bottom: 40px;
+    opacity: 0;
+    animation: fadeUp 0.6s 0.6s forwards;
+    line-height: 1.8;
+  }
+
+  .hero-cta {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    opacity: 0;
+    animation: fadeUp 0.6s 0.8s forwards;
+  }
+
+  .btn-primary {
+    padding: 14px 28px;
+    background: var(--accent);
+    color: #08080f;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.2s;
+    clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%);
+  }
+
+  .btn-primary:hover {
+    background: #00ffcc;
+    transform: translateY(-2px);
+  }
+
+  .btn-secondary {
+    padding: 14px 28px;
+    background: transparent;
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    letter-spacing: 0.05em;
+    border: 1px solid var(--border);
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.2s;
+  }
+
+  .btn-secondary:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .hero-stats {
+    position: absolute;
+    right: 48px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    opacity: 0;
+    animation: fadeLeft 0.6s 1s forwards;
+  }
+
+  .stat-item {
+    text-align: right;
+    padding: 16px 0;
+    border-right: 2px solid var(--accent);
+    padding-right: 20px;
+  }
+
+  .stat-num {
+    font-family: var(--font-display);
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--accent);
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-size: 11px;
+    color: var(--text2);
+    font-family: var(--font-mono);
+    letter-spacing: 0.08em;
+    margin-top: 4px;
+  }
+
+  /* ===== TERMINAL DEMO ===== */
+  .terminal-section {
+    padding: 80px 48px;
+    background: var(--bg2);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .section-title {
+    font-family: var(--font-display);
+    font-size: clamp(24px, 3vw, 36px);
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+
+  .section-desc {
+    color: var(--text2);
+    font-size: 14px;
+    margin-bottom: 48px;
+    max-width: 500px;
+  }
+
+  .demo-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    max-width: 1100px;
+  }
+
+  .terminal {
+    background: #0a0a12;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    font-family: var(--font-mono);
+    font-size: 13px;
+  }
+
+  .terminal-header {
+    background: #141420;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .terminal-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+  }
+
+  .dot-red { background: #ff5f57; }
+  .dot-yellow { background: #ffbd2e; }
+  .dot-green { background: #28ca41; }
+
+  .terminal-title {
+    font-size: 11px;
+    color: var(--text2);
+    margin-left: 8px;
+    letter-spacing: 0.05em;
+  }
+
+  .terminal-body {
+    padding: 20px;
+    min-height: 280px;
+    position: relative;
+  }
+
+  .term-line {
+    margin-bottom: 6px;
+    opacity: 0;
+    transform: translateY(4px);
+    transition: all 0.3s;
+  }
+
+  .term-line.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .term-prompt { color: var(--accent); }
+  .term-cmd { color: var(--text); }
+  .term-output { color: var(--text2); padding-left: 16px; }
+  .term-success { color: #00e5b0; padding-left: 16px; }
+  .term-warn { color: #ffbd2e; padding-left: 16px; }
+  .term-cursor {
+    display: inline-block;
+    width: 8px;
+    height: 14px;
+    background: var(--accent);
+    animation: blink 1s infinite;
+    vertical-align: middle;
+  }
+
+  @keyframes blink {
+    0%, 49% { opacity: 1; }
+    50%, 100% { opacity: 0; }
+  }
+
+  /* ===== LIVE DEMO PANEL ===== */
+  .demo-panel {
+    background: #0a0a12;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .demo-panel-header {
+    background: #141420;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .demo-panel-title {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text2);
+    letter-spacing: 0.05em;
+  }
+
+  .badge-live {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    padding: 2px 8px;
+    border-radius: 2px;
+    letter-spacing: 0.1em;
+  }
+
+  .demo-panel-body {
+    padding: 20px;
+  }
+
+  .demo-input-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .demo-select {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    padding: 10px 12px;
+    flex: 1;
+    outline: none;
+    transition: border 0.2s;
+  }
+
+  .demo-select:focus { border-color: var(--accent); }
+
+  .demo-btn {
+    padding: 10px 20px;
+    background: var(--accent);
+    color: #08080f;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    letter-spacing: 0.05em;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .demo-btn:hover { background: #00ffcc; }
+  .demo-btn:disabled { background: var(--bg3); color: var(--text2); cursor: not-allowed; }
+
+  .demo-output {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 16px;
+    font-size: 13px;
+    min-height: 180px;
+    color: var(--text2);
+    line-height: 1.7;
+    white-space: pre-wrap;
+    font-family: var(--font-body);
+  }
+
+  .demo-output.loading {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--accent);
+    font-family: var(--font-mono);
+    font-size: 12px;
+  }
+
+  .spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  /* ===== SKILLS ===== */
+  .skills-section {
+    padding: 80px 48px;
+  }
+
+  .skills-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 16px;
+    max-width: 1100px;
+    margin-top: 48px;
+  }
+
+  .skill-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    padding: 28px;
+    position: relative;
+    transition: all 0.3s;
+    overflow: hidden;
+  }
+
+  .skill-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    height: 2px;
+    width: 0;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    transition: width 0.4s;
+  }
+
+  .skill-card:hover::before { width: 100%; }
+  .skill-card:hover { border-color: rgba(0,229,176,0.2); transform: translateY(-4px); }
+
+  .skill-icon {
+    font-size: 28px;
+    margin-bottom: 16px;
+  }
+
+  .skill-name {
+    font-family: var(--font-display);
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+
+  .skill-desc {
+    font-size: 13px;
+    color: var(--text2);
+    line-height: 1.7;
+  }
+
+  .skill-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 14px;
+  }
+
+  .tag {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    padding: 3px 8px;
+    background: rgba(0,229,176,0.08);
+    color: var(--accent);
+    border: 1px solid rgba(0,229,176,0.2);
+    letter-spacing: 0.05em;
+  }
+
+  /* ===== PROCESS ===== */
+  .process-section {
+    padding: 80px 48px;
+    background: var(--bg2);
+    border-top: 1px solid var(--border);
+  }
+
+  .process-steps {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    max-width: 1000px;
+    margin-top: 48px;
+    position: relative;
+  }
+
+  .process-steps::before {
+    content: '';
+    position: absolute;
+    top: 28px;
+    left: 12%;
+    right: 12%;
+    height: 1px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    z-index: 0;
+  }
+
+  .process-step {
+    text-align: center;
+    padding: 0 16px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .step-num {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--bg);
+    border: 2px solid var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--accent);
+    margin: 0 auto 16px;
+  }
+
+  .step-title {
+    font-family: var(--font-display);
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+
+  .step-desc {
+    font-size: 12px;
+    color: var(--text2);
+    line-height: 1.6;
+  }
+
+  /* ===== ABOUT ===== */
+  .about-section {
+    padding: 80px 48px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    max-width: 1100px;
+  }
+
+  .about-text h2 {
+    font-family: var(--font-display);
+    font-size: clamp(24px, 3vw, 36px);
+    font-weight: 700;
+    margin-bottom: 24px;
+  }
+
+  .about-text p {
+    color: var(--text2);
+    font-size: 14px;
+    margin-bottom: 16px;
+    line-height: 1.9;
+  }
+
+  .about-text p strong {
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  .about-text p .accent { color: var(--accent); }
+
+  .timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .timeline-item {
+    display: flex;
+    gap: 20px;
+    padding-bottom: 28px;
+    position: relative;
+  }
+
+  .timeline-item::after {
+    content: '';
+    position: absolute;
+    left: 5px;
+    top: 14px;
+    bottom: 0;
+    width: 1px;
+    background: var(--border);
+  }
+
+  .timeline-item:last-child::after { display: none; }
+
+  .timeline-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--accent);
+    flex-shrink: 0;
+    margin-top: 4px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .timeline-content {}
+
+  .timeline-year {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+    margin-bottom: 4px;
+  }
+
+  .timeline-title {
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 4px;
+  }
+
+  .timeline-desc {
+    font-size: 12px;
+    color: var(--text2);
+    line-height: 1.6;
+  }
+
+  /* ===== CTA ===== */
+  .cta-section {
+    padding: 100px 48px;
+    text-align: center;
+    background: var(--bg2);
+    border-top: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cta-glow {
+    position: absolute;
+    width: 400px;
+    height: 400px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0,229,176,0.06) 0%, transparent 70%);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+
+  .cta-section h2 {
+    font-family: var(--font-display);
+    font-size: clamp(28px, 4vw, 48px);
+    font-weight: 800;
+    margin-bottom: 16px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .cta-section p {
+    color: var(--text2);
+    font-size: 15px;
+    margin-bottom: 40px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .cta-section .btn-primary {
+    font-size: 14px;
+    padding: 16px 40px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ===== FOOTER ===== */
+  footer {
+    padding: 32px 48px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  footer p {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text2);
+  }
+
+  .footer-accent { color: var(--accent); }
+
+  /* ===== ANIMATIONS ===== */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeLeft {
+    from { opacity: 0; transform: translateX(20px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 768px) {
+    nav { padding: 16px 24px; }
+    .nav-links { display: none; }
+    .hero { padding: 100px 24px 60px; }
+    .hero-stats { display: none; }
+    .demo-grid { grid-template-columns: 1fr; }
+    .process-steps { grid-template-columns: 1fr 1fr; }
+    .process-steps::before { display: none; }
+    .about-section { grid-template-columns: 1fr; gap: 40px; }
+    .skills-section, .terminal-section, .process-section, .cta-section { padding: 60px 24px; }
+    footer { padding: 24px; flex-direction: column; gap: 8px; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">// portfolio</div>
+  <ul class="nav-links">
+    <li><a href="#demo">デモ</a></li>
+    <li><a href="#skills">スキル</a></li>
+    <li><a href="#about">経歴</a></li>
+    <li><a href="#contact">お問い合わせ</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg-grid"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-content">
+    <div class="hero-label">// Automation Engineer × AI Consultant</div>
+    <h1 class="hero-title">
+      「この作業、<br>
+      <span>自動化できますよ。」</span>
+    </h1>
+    <p class="hero-sub">
+      GAS・Python・AIエージェントを組み合わせて、<br>
+      現場の繰り返し業務を仕組みに変えます。<br>
+      ヒアリングから実装・運用まで一気通貫で対応。
+    </p>
+    <div class="hero-cta">
+      <a href="#demo" class="btn-primary">デモを見る</a>
+      <a href="#contact" class="btn-secondary">相談する</a>
+    </div>
+  </div>
+  <div class="hero-stats">
+    <div class="stat-item">
+      <div class="stat-num">¥1億+</div>
+      <div class="stat-label">元事業年商</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">24h</div>
+      <div class="stat-label">返信スピード</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">3日〜</div>
+      <div class="stat-label">納品スピード</div>
+    </div>
+  </div>
+</section>
+
+<!-- DEMO -->
+<section class="terminal-section" id="demo">
+  <div class="section-label">// live demo</div>
+  <h2 class="section-title">実際に動くエージェントを見てください</h2>
+  <p class="section-desc">業務の困りごとを入力すると、AIが自動化の設計案を提案します。</p>
+
+  <div class="demo-grid">
+    <!-- Terminal Animation -->
+    <div class="terminal">
+      <div class="terminal-header">
+        <div class="terminal-dot dot-red"></div>
+        <div class="terminal-dot dot-yellow"></div>
+        <div class="terminal-dot dot-green"></div>
+        <div class="terminal-title">automation_agent.py</div>
+      </div>
+      <div class="terminal-body" id="termBody">
+        <div class="term-line" id="tl0"><span class="term-prompt">$ </span><span class="term-cmd">python automation_agent.py --mode analyze</span></div>
+        <div class="term-line" id="tl1"><span class="term-output">▶ 業務フロー解析モジュール 起動中...</span></div>
+        <div class="term-line" id="tl2"><span class="term-output">▶ AIエンジン (Claude API) 接続完了</span></div>
+        <div class="term-line" id="tl3"><span class="term-output">▶ ヒアリングフォーム 展開中...</span></div>
+        <div class="term-line" id="tl4"><span class="term-success">✓ 準備完了。業務内容を入力してください。</span></div>
+        <div class="term-line" id="tl5"></div>
+        <div class="term-line" id="tl6"><span class="term-prompt">$ </span><span class="term-cmd" id="typedCmd"></span><span class="term-cursor" id="cursor"></span></div>
+        <div class="term-line" id="tl7"></div>
+        <div class="term-line" id="tl8" style="display:none"><span class="term-warn">⚡ 自動化スコア計算中...</span></div>
+        <div class="term-line" id="tl9" style="display:none"><span class="term-success" id="scoreOutput"></span></div>
+      </div>
+    </div>
+
+    <!-- Live AI Demo -->
+    <div class="demo-panel">
+      <div class="demo-panel-header">
+        <div class="demo-panel-title">業務自動化 診断エージェント</div>
+        <div class="badge-live">LIVE</div>
+      </div>
+      <div class="demo-panel-body">
+        <div class="demo-input-row">
+          <select class="demo-select" id="bizType">
+            <option value="">業種を選択...</option>
+            <option value="酒造・食品製造">酒造・食品製造</option>
+            <option value="小売・EC">小売・EC</option>
+            <option value="不動産">不動産</option>
+            <option value="士業・コンサル">士業・コンサル</option>
+            <option value="飲食">飲食</option>
+            <option value="その他製造業">その他製造業</option>
+          </select>
+        </div>
+        <div class="demo-input-row">
+          <select class="demo-select" id="painType">
+            <option value="">お困りごとを選択...</option>
+            <option value="受注・発注の管理が手作業で大変">受注・発注の管理が手作業で大変</option>
+            <option value="毎日同じレポートを手で作っている">毎日同じレポートを手で作っている</option>
+            <option value="問い合わせ対応に時間がかかっている">問い合わせ対応に時間がかかっている</option>
+            <option value="在庫管理がExcelで属人化している">在庫管理がExcelで属人化している</option>
+            <option value="社内の情報共有が遅い">社内の情報共有が遅い</option>
+          </select>
+          <button class="demo-btn" id="analyzeBtn" onclick="runDemo()">診断する</button>
+        </div>
+        <div class="demo-output" id="demoOutput">← 業種とお困りごとを選んで「診断する」を押してください。</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SKILLS -->
+<section class="skills-section" id="skills">
+  <div class="section-label">// capabilities</div>
+  <h2 class="section-title">できること</h2>
+  <p class="section-desc">繰り返し業務・データ処理・情報集約。AIと自動化の組み合わせで解決します。</p>
+
+  <div class="skills-grid">
+    <div class="skill-card">
+      <div class="skill-icon">⚡</div>
+      <div class="skill-name">業務自動化（GAS）</div>
+      <div class="skill-desc">Googleスプレッドシート・Forms・Gmailと連携したスクリプトで、日常業務の繰り返し作業を自動化します。</div>
+      <div class="skill-tags">
+        <span class="tag">Google Apps Script</span>
+        <span class="tag">Spreadsheet</span>
+        <span class="tag">Gmail API</span>
+        <span class="tag">Google Forms</span>
+      </div>
+    </div>
+
+    <div class="skill-card">
+      <div class="skill-icon">🐍</div>
+      <div class="skill-name">Pythonスクリプト</div>
+      <div class="skill-desc">データ整形・CSV/Excel処理・定期バッチ処理・Web APIとの連携など、幅広い自動化に対応します。</div>
+      <div class="skill-tags">
+        <span class="tag">Python</span>
+        <span class="tag">pandas</span>
+        <span class="tag">REST API</span>
+        <span class="tag">定期実行</span>
+      </div>
+    </div>
+
+    <div class="skill-card">
+      <div class="skill-icon">🤖</div>
+      <div class="skill-name">AIエージェント開発</div>
+      <div class="skill-desc">Claude・ChatGPT・GeminiなどのAI APIを組み込み、問い合わせ自動対応・文書生成・分類エージェントを構築します。</div>
+      <div class="skill-tags">
+        <span class="tag">Claude API</span>
+        <span class="tag">GPT-4</span>
+        <span class="tag">Gemini</span>
+        <span class="tag">エージェント設計</span>
+      </div>
+    </div>
+
+    <div class="skill-card">
+      <div class="skill-icon">🗄️</div>
+      <div class="skill-name">DB構築・データ設計</div>
+      <div class="skill-desc">業務データを整理・構造化し、AIが参照できるデータソースを設計・構築します。MongoDB・Spreadsheet DB対応。</div>
+      <div class="skill-tags">
+        <span class="tag">MongoDB</span>
+        <span class="tag">データモデリング</span>
+        <span class="tag">API設計</span>
+      </div>
+    </div>
+
+    <div class="skill-card">
+      <div class="skill-icon">🔍</div>
+      <div class="skill-name">業務ヒアリング・設計</div>
+      <div class="skill-desc">現場担当者から課題をヒアリングし、何をどう自動化するかのロードマップを作成。技術の前に「何を解決するか」を整理します。</div>
+      <div class="skill-tags">
+        <span class="tag">要件定義</span>
+        <span class="tag">課題整理</span>
+        <span class="tag">ロードマップ</span>
+      </div>
+    </div>
+
+    <div class="skill-card">
+      <div class="skill-icon">🚀</div>
+      <div class="skill-name">デプロイ・運用支援</div>
+      <div class="skill-desc">Vercelへのデプロイ・GitHub管理・運用後のメンテナンスまで対応。作って終わりにしません。</div>
+      <div class="skill-tags">
+        <span class="tag">Vercel</span>
+        <span class="tag">GitHub</span>
+        <span class="tag">保守対応</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROCESS -->
+<section class="process-section">
+  <div class="section-label">// workflow</div>
+  <h2 class="section-title">進め方</h2>
+  <p class="section-desc">ヒアリングから納品まで、一気通貫で対応します。</p>
+
+  <div class="process-steps">
+    <div class="process-step">
+      <div class="step-num">01</div>
+      <div class="step-title">ヒアリング</div>
+      <div class="step-desc">現場の困りごとを丁寧にお聞きします。Zoomまたはチャットで対応。</div>
+    </div>
+    <div class="process-step">
+      <div class="step-num">02</div>
+      <div class="step-title">設計・提案</div>
+      <div class="step-desc">自動化できる範囲・工数・費用感を整理してご提案します。</div>
+    </div>
+    <div class="process-step">
+      <div class="step-num">03</div>
+      <div class="step-title">実装</div>
+      <div class="step-desc">AIを活用した高速開発で、最短3日〜の納品が可能です。</div>
+    </div>
+    <div class="process-step">
+      <div class="step-num">04</div>
+      <div class="step-title">納品・伴走</div>
+      <div class="step-desc">動作確認・マニュアル提供・修正対応まで責任を持って完結。</div>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section class="about-section" id="about">
+  <div class="about-text">
+    <div class="section-label">// profile</div>
+    <h2>技術だけでなく、<br>事業視点で動きます。</h2>
+    <p>
+      僕はもともと<strong>物販事業者</strong>でした。
+      年商1億円規模のEC事業を1人で回していた経験から、
+      「現場が本当に困っていること」を理解した上でシステムを作る視点を持っています。
+    </p>
+    <p>
+      エンジニアが提案する「技術的に正しい解」ではなく、
+      <strong>「その会社が明日から楽になる解」</strong>を優先します。
+    </p>
+    <p>
+      現在はAI・自動化に特化して、
+      <span class="accent">業務改善の伴走パートナー</span>として複数社と稼働中です。
+    </p>
+  </div>
+
+  <div class="timeline">
+    <div class="section-label" style="margin-bottom:24px">// history</div>
+    <div class="timeline-item">
+      <div class="timeline-dot"></div>
+      <div class="timeline-content">
+        <div class="timeline-year">2014 → 2020</div>
+        <div class="timeline-title">EC物販事業 経営</div>
+        <div class="timeline-desc">年商1億円規模を1人で運営。月1,500万円の売上最高記録。業務効率化の必要性を肌で感じた時期。</div>
+      </div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-dot"></div>
+      <div class="timeline-content">
+        <div class="timeline-year">2020 → 2025</div>
+        <div class="timeline-title">人材・建設業での実務経験</div>
+        <div class="timeline-desc">大企業の現場で「属人化した業務」「非効率な手作業」を間近で見続けた。</div>
+      </div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-dot"></div>
+      <div class="timeline-content">
+        <div class="timeline-year">2026 →</div>
+        <div class="timeline-title">AI業務自動化エンジニアとして独立</div>
+        <div class="timeline-desc">Claude Code・GAS・Pythonを軸に、中小企業の業務改善・AI導入支援に特化。</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section" id="contact">
+  <div class="cta-glow"></div>
+  <h2>まず、相談してみてください。</h2>
+  <p>「自動化できるかわからない」でも大丈夫です。ヒアリングから一緒に考えます。</p>
+  <a href="https://crowdworks.jp" class="btn-primary" target="_blank">クラウドワークスからメッセージする</a>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <p><span class="footer-accent">AI業務自動化エンジニア</span></p>
+  <p style="font-size:11px; color: rgba(136,136,170,0.5)">GAS / Python / Claude API / AIエージェント開発</p>
+</footer>
+
+<script>
+// Terminal animation
+const lines = document.querySelectorAll('.term-line');
+lines.forEach((el, i) => {
+  setTimeout(() => el.classList.add('visible'), i * 400);
+});
+
+// Typing animation in terminal
+const commands = [
+  "analyze --input '受注管理'",
+  "analyze --input '問い合わせ対応'",
+  "analyze --input '在庫管理レポート'"
+];
+let cmdIndex = 0;
+let charIndex = 0;
+const typedCmd = document.getElementById('typedCmd');
+const cursor = document.getElementById('cursor');
+
+function typeNext() {
+  if (charIndex < commands[cmdIndex].length) {
+    typedCmd.textContent += commands[cmdIndex][charIndex++];
+    setTimeout(typeNext, 60);
+  } else {
+    // Show score output
+    setTimeout(() => {
+      const tl8 = document.getElementById('tl8');
+      const tl9 = document.getElementById('tl9');
+      const scoreOut = document.getElementById('scoreOutput');
+      tl8.style.display = 'block';
+      tl8.classList.add('visible');
+      setTimeout(() => {
+        tl9.style.display = 'block';
+        tl9.classList.add('visible');
+        const scores = ['自動化スコア: 87/100 — 高優先度', '自動化スコア: 92/100 — 即対応推奨', '自動化スコア: 79/100 — 対応可能'];
+        scoreOut.textContent = '✓ ' + scores[cmdIndex];
+        // Reset after delay
+        setTimeout(() => {
+          tl8.style.display = 'none';
+          tl9.style.display = 'none';
+          typedCmd.textContent = '';
+          charIndex = 0;
+          cmdIndex = (cmdIndex + 1) % commands.length;
+          setTimeout(typeNext, 800);
+        }, 3000);
+      }, 1000);
+    }, 600);
+  }
+}
+
+setTimeout(typeNext, 2800);
+
+// Live AI Demo
+async function runDemo() {
+  const bizType = document.getElementById('bizType').value;
+  const painType = document.getElementById('painType').value;
+  const output = document.getElementById('demoOutput');
+  const btn = document.getElementById('analyzeBtn');
+
+  if (!bizType || !painType) {
+    output.textContent = '⚠ 業種とお困りごとを両方選択してください。';
+    return;
+  }
+
+  btn.disabled = true;
+  output.className = 'demo-output loading';
+  output.innerHTML = '<div class="spinner"></div> AIが分析中...';
+
+  try {
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 600,
+        system: `あなたは業務自動化の専門家です。業種とお困りごとを受け取り、以下の形式でコンパクトに回答してください。日本語で、簡潔に。
+
+【自動化の提案】
+- 何を自動化するか（1〜2行）
+
+【使用技術】
+- 具体的なツール・技術名を列挙
+
+【期待効果】
+- 削減できる工数や改善内容
+
+【実装の難易度】
+★〜★★★★★で表示し、一言コメント
+
+全体で200字以内にまとめてください。`,
+        messages: [{
+          role: "user",
+          content: `業種：${bizType}\nお困りごと：${painType}\n\nこの業務の自動化提案をしてください。`
+        }]
+      })
+    });
+
+    const data = await res.json();
+    const text = data.content?.[0]?.text || "提案を生成できませんでした。";
+    output.className = 'demo-output';
+    output.textContent = text;
+  } catch (e) {
+    output.className = 'demo-output';
+    output.textContent = '※ デモ実行にはAPI接続が必要です。\n\n【サンプル回答】\n【自動化の提案】\n受注データをGASで自動集計し、Slackへ日次レポートを配信。\n\n【使用技術】\nGoogle Apps Script / Spreadsheet / Slack API\n\n【期待効果】\n毎日30分のレポート作業がゼロに。\n\n【実装の難易度】\n★★☆☆☆ — 2〜3日で実装可能';
+  }
+
+  btn.disabled = false;
+}
+</script>
+</body>
+</html>
