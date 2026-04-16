@@ -218,35 +218,58 @@
     transform: translateY(-50%);
     display: flex;
     flex-direction: column;
-    gap: 24px;
+    gap: 12px;
     opacity: 0;
     animation: fadeLeft 0.6s 1s forwards;
   }
 
   .stat-item {
+    background: rgba(0,229,176,0.04);
+    border: 1px solid rgba(0,229,176,0.15);
+    border-left: 3px solid var(--accent);
+    padding: 14px 20px 14px 16px;
     text-align: right;
-    padding: 16px 0;
-    border-right: 2px solid var(--accent);
-    padding-right: 20px;
+    min-width: 160px;
+    position: relative;
+    transition: background 0.3s;
+  }
+
+  .stat-item:hover {
+    background: rgba(0,229,176,0.08);
+  }
+
+  .stat-item::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: -6px;
+    transform: translateY(-50%);
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 8px var(--accent);
   }
 
   .stat-num {
     font-family: var(--font-mono);
-    font-size: 24px;
+    font-size: 32px;
     font-weight: 500;
     color: var(--accent);
     line-height: 1;
     white-space: nowrap;
     letter-spacing: 0.02em;
+    text-shadow: 0 0 20px rgba(0,229,176,0.4);
   }
 
   .stat-label {
-    font-size: 10px;
+    font-size: 11px;
     color: var(--text2);
     font-family: var(--font-mono);
-    letter-spacing: 0.05em;
-    margin-top: 4px;
+    letter-spacing: 0.08em;
+    margin-top: 5px;
     white-space: nowrap;
+    text-transform: uppercase;
   }
 
   /* ===== TERMINAL DEMO ===== */
@@ -814,7 +837,7 @@
   </div>
   <div class="hero-stats">
     <div class="stat-item">
-      <div class="stat-num">1億+</div>
+      <div class="stat-num">0億+</div>
       <div class="stat-label">元事業年商</div>
     </div>
     <div class="stat-item">
@@ -1170,6 +1193,30 @@ async function runDemo() {
 
   btn.disabled = false;
 }
+
+// Count-up animation
+function countUp(el, target, suffix, duration) {
+  let start = 0;
+  const step = target / (duration / 16);
+  const timer = setInterval(() => {
+    start += step;
+    if (start >= target) {
+      el.textContent = target + suffix;
+      clearInterval(timer);
+    } else {
+      el.textContent = Math.floor(start) + suffix;
+    }
+  }, 16);
+}
+
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    const nums = document.querySelectorAll('.stat-num');
+    if (nums[0]) countUp(nums[0], 1, '億+', 1200);
+    if (nums[1]) countUp(nums[1], 24, 'h', 1000);
+    if (nums[2]) countUp(nums[2], 3, '日〜', 800);
+  }, 1200);
+});
 </script>
 </body>
 </html>
