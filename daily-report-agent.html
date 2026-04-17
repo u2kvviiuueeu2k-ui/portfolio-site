@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>日次レポート自動生成エージェント | ゆっけ ポートフォリオ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;600;700&family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+JP:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0f0e;
+    --bg2: #131715;
+    --bg3: #1a1f1c;
+    --surface: #1e2420;
+    --surface2: #242b26;
+    --border: #2a3330;
+    --border2: #344039;
+    --accent: #8fbc8f;
+    --accent2: #6b9e6b;
+    --amber: #c9a84c;
+    --amber2: #e8c870;
+    --text: #e8ede9;
+    --text2: #9dada0;
+    --text3: #6b7a6e;
+    --red: #d4706a;
+    --blue: #6a9fd4;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Sans JP', sans-serif;
+    font-weight: 300;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Grain overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.6;
+  }
+
+  .container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 24px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Header */
+  header {
+    padding: 40px 0 32px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .header-inner {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--text3);
+    text-decoration: none;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    transition: color 0.2s;
+    margin-bottom: 20px;
+  }
+  .back-link:hover { color: var(--accent); }
+
+  .badge {
+    display: inline-block;
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 2px;
+    padding: 4px 10px;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--accent);
+    font-family: 'IBM Plex Mono', monospace;
+    text-transform: uppercase;
+  }
+
+  h1 {
+    font-family: 'Noto Serif JP', serif;
+    font-size: clamp(22px, 4vw, 30px);
+    font-weight: 700;
+    line-height: 1.4;
+    color: var(--text);
+    margin: 12px 0 8px;
+    letter-spacing: -0.01em;
+  }
+
+  .subtitle {
+    color: var(--text2);
+    font-size: 14px;
+    line-height: 1.7;
+    max-width: 600px;
+  }
+
+  .live-dot {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--accent);
+    font-family: 'IBM Plex Mono', monospace;
+  }
+  .live-dot::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.8); }
+  }
+
+  /* Main layout */
+  .main-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0;
+    padding: 32px 0 60px;
+  }
+
+  /* Section */
+  .section {
+    margin-bottom: 32px;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+
+  .section-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    color: var(--text3);
+    text-transform: uppercase;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  .section-num {
+    color: var(--amber);
+  }
+
+  /* Data table */
+  .data-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .data-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .data-card-title {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--text2);
+  }
+
+  .spreadsheet-icon {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    color: var(--accent2);
+  }
+
+  .table-wrap {
+    overflow-x: auto;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  thead tr {
+    background: var(--bg3);
+    border-bottom: 1px solid var(--border2);
+  }
+
+  th {
+    padding: 10px 14px;
+    text-align: left;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    color: var(--text3);
+    font-weight: 400;
+    font-family: 'IBM Plex Mono', monospace;
+    white-space: nowrap;
+  }
+
+  td {
+    padding: 9px 14px;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+    color: var(--text2);
+    white-space: nowrap;
+  }
+
+  tr:last-child td { border-bottom: none; }
+
+  tr:hover td { background: var(--surface2); }
+
+  .td-tank {
+    font-family: 'IBM Plex Mono', monospace;
+    color: var(--amber);
+    font-size: 12px;
+  }
+
+  .status-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 2px;
+    font-size: 11px;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  .status-ok { background: rgba(143,188,143,0.1); color: var(--accent); border: 1px solid rgba(143,188,143,0.2); }
+  .status-warn { background: rgba(201,168,76,0.1); color: var(--amber); border: 1px solid rgba(201,168,76,0.2); }
+  .status-alert { background: rgba(212,112,106,0.1); color: var(--red); border: 1px solid rgba(212,112,106,0.2); }
+
+  .num-val {
+    font-family: 'IBM Plex Mono', monospace;
+    color: var(--text);
+  }
+
+  /* Date selector area */
+  .config-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+
+  .config-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .config-label {
+    font-size: 11px;
+    color: var(--text3);
+    letter-spacing: 0.08em;
+  }
+
+  select, input[type="date"] {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 3px;
+    color: var(--text);
+    padding: 6px 10px;
+    font-size: 12px;
+    font-family: 'IBM Plex Mono', monospace;
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.2s;
+  }
+
+  select:hover, input[type="date"]:hover { border-color: var(--accent2); }
+  select:focus, input[type="date"]:focus { border-color: var(--accent); }
+
+  /* Generate button */
+  .generate-area {
+    text-align: center;
+    padding: 24px 0 16px;
+  }
+
+  .btn-generate {
+    background: linear-gradient(135deg, var(--accent2), var(--accent));
+    border: none;
+    border-radius: 3px;
+    color: var(--bg);
+    font-size: 14px;
+    font-weight: 500;
+    font-family: 'Noto Sans JP', sans-serif;
+    padding: 14px 36px;
+    cursor: pointer;
+    letter-spacing: 0.05em;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-generate:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 24px rgba(143,188,143,0.25);
+  }
+
+  .btn-generate:active { transform: translateY(0); }
+
+  .btn-generate:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+
+  .btn-icon { font-size: 16px; }
+
+  /* Loading */
+  .loading-bar {
+    height: 2px;
+    background: var(--border);
+    border-radius: 1px;
+    overflow: hidden;
+    margin: 0 0 24px;
+    display: none;
+  }
+
+  .loading-bar.active { display: block; }
+
+  .loading-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent2), var(--amber), var(--accent));
+    background-size: 200% 100%;
+    animation: shimmer 1.2s ease-in-out infinite;
+  }
+
+  @keyframes shimmer {
+    0% { background-position: -200% center; width: 30%; }
+    50% { background-position: 0% center; width: 70%; }
+    100% { background-position: 200% center; width: 100%; }
+  }
+
+  /* Report output */
+  .report-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    display: none;
+  }
+
+  .report-card.visible { display: block; animation: fadeIn 0.4s ease; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .report-header {
+    background: var(--bg3);
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .report-header-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .ai-tag {
+    background: rgba(143,188,143,0.12);
+    border: 1px solid rgba(143,188,143,0.2);
+    color: var(--accent);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 2px;
+    letter-spacing: 0.1em;
+  }
+
+  .report-meta {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--text3);
+  }
+
+  .report-body {
+    padding: 24px;
+  }
+
+  .report-text {
+    font-size: 14px;
+    line-height: 1.9;
+    color: var(--text);
+    white-space: pre-wrap;
+    font-family: 'Noto Serif JP', serif;
+    font-weight: 400;
+  }
+
+  /* Send section */
+  .send-section {
+    padding: 16px 24px;
+    border-top: 1px solid var(--border);
+    background: var(--bg3);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .send-label {
+    font-size: 11px;
+    color: var(--text3);
+    letter-spacing: 0.08em;
+  }
+
+  .btn-send {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    border-radius: 3px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: 'Noto Sans JP', sans-serif;
+    letter-spacing: 0.03em;
+  }
+
+  .btn-slack {
+    background: rgba(106,159,212,0.1);
+    border: 1px solid rgba(106,159,212,0.25);
+    color: var(--blue);
+  }
+  .btn-slack:hover { background: rgba(106,159,212,0.18); }
+
+  .btn-email {
+    background: rgba(201,168,76,0.1);
+    border: 1px solid rgba(201,168,76,0.25);
+    color: var(--amber);
+  }
+  .btn-email:hover { background: rgba(201,168,76,0.18); }
+
+  .sent-msg {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    display: none;
+  }
+  .sent-msg.visible { display: inline; }
+
+  /* Code preview */
+  .code-section {
+    margin-bottom: 32px;
+  }
+
+  .code-block {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .code-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .code-lang {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--amber);
+    letter-spacing: 0.1em;
+  }
+
+  .code-copy {
+    background: none;
+    border: 1px solid var(--border2);
+    color: var(--text3);
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 2px;
+    cursor: pointer;
+    font-family: 'IBM Plex Mono', monospace;
+    transition: all 0.15s;
+  }
+  .code-copy:hover { border-color: var(--accent2); color: var(--accent); }
+
+  pre {
+    padding: 20px;
+    overflow-x: auto;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    line-height: 1.7;
+    color: var(--text2);
+  }
+
+  .kw { color: var(--amber); }
+  .fn { color: var(--accent); }
+  .str { color: #a8d5a8; }
+  .cm { color: var(--text3); font-style: italic; }
+  .var { color: #a8c8e8; }
+
+  /* Error */
+  .error-box {
+    background: rgba(212,112,106,0.08);
+    border: 1px solid rgba(212,112,106,0.2);
+    border-radius: 4px;
+    padding: 16px;
+    color: var(--red);
+    font-size: 13px;
+    display: none;
+    margin-top: 16px;
+  }
+  .error-box.visible { display: block; }
+
+  /* Flow diagram */
+  .flow-diagram {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    padding: 20px 24px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow-x: auto;
+    margin-bottom: 32px;
+  }
+
+  .flow-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    min-width: 90px;
+    flex: 1;
+  }
+
+  .flow-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    border: 1px solid var(--border2);
+  }
+
+  .flow-icon.green { background: rgba(143,188,143,0.1); border-color: rgba(143,188,143,0.2); }
+  .flow-icon.amber { background: rgba(201,168,76,0.1); border-color: rgba(201,168,76,0.2); }
+  .flow-icon.blue  { background: rgba(106,159,212,0.1); border-color: rgba(106,159,212,0.2); }
+
+  .flow-label {
+    font-size: 11px;
+    color: var(--text3);
+    text-align: center;
+    letter-spacing: 0.04em;
+  }
+
+  .flow-arrow {
+    color: var(--text3);
+    font-size: 18px;
+    padding: 0 4px;
+    flex-shrink: 0;
+    margin-bottom: 18px;
+  }
+
+  /* Divider */
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 32px 0;
+  }
+
+  /* Responsive */
+  @media (max-width: 600px) {
+    .config-row { gap: 8px; }
+    .flow-step { min-width: 70px; }
+    .flow-label { font-size: 10px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <a href="index.html" class="back-link">← ポートフォリオに戻る</a>
+
+    <div class="header-inner">
+      <div>
+        <div class="badge">Portfolio Work #02</div>
+        <h1>日次レポート自動生成エージェント</h1>
+        <p class="subtitle">
+          スプレッドシートの生産データを読み込み、Claude APIでサマリーを自動生成。<br>
+          Slack・メールへの自動送信まで一気通貫で処理します。
+        </p>
+      </div>
+      <div class="live-dot">LIVE DEMO</div>
+    </div>
+  </header>
+
+  <div class="main-grid">
+
+    <!-- Flow diagram -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-title"><span class="section-num">00</span> WORKFLOW</div>
+      </div>
+      <div class="flow-diagram">
+        <div class="flow-step">
+          <div class="flow-icon green">📊</div>
+          <div class="flow-label">Spreadsheet<br>データ取得</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="flow-icon amber">🤖</div>
+          <div class="flow-label">Claude API<br>サマリー生成</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="flow-icon blue">✉️</div>
+          <div class="flow-label">Slack / Mail<br>自動送信</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="flow-icon green">📁</div>
+          <div class="flow-label">Drive に<br>ログ保存</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 1: Input data -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-title"><span class="section-num">01</span> INPUT — スプレッドシートデータ</div>
+      </div>
+
+      <div class="config-row">
+        <div class="config-item">
+          <span class="config-label">日付</span>
+          <input type="date" id="report-date" value="2026-04-17">
+        </div>
+        <div class="config-item">
+          <span class="config-label">蔵元</span>
+          <select id="brewery-select">
+            <option value="matsui">松井酒造合名会社</option>
+            <option value="demo">デモ蔵元</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="data-card">
+        <div class="data-card-header">
+          <span class="data-card-title">📋 日次生産管理シート.xlsx</span>
+          <span class="spreadsheet-icon">● Google Sheets 連携済み</span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>タンクID</th>
+                <th>銘柄</th>
+                <th>仕込み経過日数</th>
+                <th>品温 (°C)</th>
+                <th>アルコール度 (%)</th>
+                <th>日本酒度</th>
+                <th>状態</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="td-tank">T-01</td>
+                <td>純米吟醸 山田錦</td>
+                <td class="num-val">18</td>
+                <td class="num-val">12.4</td>
+                <td class="num-val">14.2</td>
+                <td class="num-val">+3.0</td>
+                <td><span class="status-badge status-ok">正常</span></td>
+              </tr>
+              <tr>
+                <td class="td-tank">T-02</td>
+                <td>本醸造 辛口</td>
+                <td class="num-val">32</td>
+                <td class="num-val">9.8</td>
+                <td class="num-val">16.8</td>
+                <td class="num-val">+8.5</td>
+                <td><span class="status-badge status-ok">正常</span></td>
+              </tr>
+              <tr>
+                <td class="td-tank">T-03</td>
+                <td>特別純米 雄町</td>
+                <td class="num-val">5</td>
+                <td class="num-val">14.9</td>
+                <td class="num-val">3.1</td>
+                <td class="num-val">-12.0</td>
+                <td><span class="status-badge status-warn">要観察</span></td>
+              </tr>
+              <tr>
+                <td class="td-tank">T-04</td>
+                <td>大吟醸 斗瓶囲</td>
+                <td class="num-val">45</td>
+                <td class="num-val">8.2</td>
+                <td class="num-val">17.5</td>
+                <td class="num-val">+5.0</td>
+                <td><span class="status-badge status-ok">正常</span></td>
+              </tr>
+              <tr>
+                <td class="td-tank">T-05</td>
+                <td>にごり酒 活性</td>
+                <td class="num-val">12</td>
+                <td class="num-val">17.3</td>
+                <td class="num-val">9.8</td>
+                <td class="num-val">-18.5</td>
+                <td><span class="status-badge status-alert">確認要</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Shipping data -->
+      <div class="data-card" style="margin-top: 12px;">
+        <div class="data-card-header">
+          <span class="data-card-title">📋 出荷・在庫管理シート.xlsx</span>
+          <span class="spreadsheet-icon">● Google Sheets 連携済み</span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>品名</th>
+                <th>本日出荷 (本)</th>
+                <th>当月累計 (本)</th>
+                <th>在庫残 (本)</th>
+                <th>前月比</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>純米吟醸 720ml</td>
+                <td class="num-val">48</td>
+                <td class="num-val">612</td>
+                <td class="num-val">384</td>
+                <td><span class="status-badge status-ok">+12%</span></td>
+              </tr>
+              <tr>
+                <td>本醸造辛口 1800ml</td>
+                <td class="num-val">30</td>
+                <td class="num-val">408</td>
+                <td class="num-val">210</td>
+                <td><span class="status-badge status-warn">-3%</span></td>
+              </tr>
+              <tr>
+                <td>大吟醸 720ml</td>
+                <td class="num-val">12</td>
+                <td class="num-val">96</td>
+                <td class="num-val">144</td>
+                <td><span class="status-badge status-ok">+8%</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 2: Generate -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-title"><span class="section-num">02</span> GENERATE — Claude API でサマリー生成</div>
+      </div>
+
+      <div class="generate-area">
+        <button class="btn-generate" id="gen-btn" onclick="generateReport()">
+          <span class="btn-icon">🤖</span>
+          AIレポートを生成する
+        </button>
+      </div>
+
+      <div class="loading-bar" id="loading-bar">
+        <div class="loading-fill"></div>
+      </div>
+
+      <div class="error-box" id="error-box"></div>
+
+      <div class="report-card" id="report-card">
+        <div class="report-header">
+          <div class="report-header-left">
+            <span class="ai-tag">Claude AI</span>
+            <span style="font-size:13px; color: var(--text2);">日次生産レポート</span>
+          </div>
+          <span class="report-meta" id="report-timestamp"></span>
+        </div>
+        <div class="report-body">
+          <div class="report-text" id="report-text"></div>
+        </div>
+        <div class="send-section">
+          <span class="send-label">送信先：</span>
+          <button class="btn-send btn-slack" onclick="simulateSend('Slack')">
+            💬 Slack #brewing-daily に送信
+          </button>
+          <button class="btn-send btn-email" onclick="simulateSend('メール')">
+            ✉️ 醸造長にメール送信
+          </button>
+          <span class="sent-msg" id="sent-msg"></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- GAS Code preview -->
+    <div class="section code-section">
+      <div class="section-header">
+        <div class="section-title"><span class="section-num">03</span> SCRIPT — 実際の自動化コード（GAS）</div>
+      </div>
+      <p style="font-size: 13px; color: var(--text2); margin-bottom: 16px; line-height: 1.7;">
+        実運用では下記のGoogle Apps Script が毎朝8時に自動実行されます。<br>
+        スプレッドシートを読み込み → Claude APIで生成 → Slackへ投稿まで全自動。
+      </p>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">Google Apps Script — daily_report.gs</span>
+          <button class="code-copy" onclick="copyCode()">コピー</button>
+        </div>
+        <pre id="code-block"><span class="cm">// ================================================================</span>
+<span class="cm">// 日次生産レポート自動生成スクリプト</span>
+<span class="cm">// 毎朝8:00にトリガー実行 → Claude API → Slack送信</span>
+<span class="cm">// ================================================================</span>
+
+<span class="kw">const</span> <span class="var">CLAUDE_API_KEY</span>  = PropertiesService.getScriptProperties().<span class="fn">getProperty</span>(<span class="str">'CLAUDE_API_KEY'</span>);
+<span class="kw">const</span> <span class="var">SLACK_WEBHOOK</span>   = PropertiesService.getScriptProperties().<span class="fn">getProperty</span>(<span class="str">'SLACK_WEBHOOK_URL'</span>);
+<span class="kw">const</span> <span class="var">SHEET_ID</span>        = PropertiesService.getScriptProperties().<span class="fn">getProperty</span>(<span class="str">'SPREADSHEET_ID'</span>);
+
+<span class="kw">function</span> <span class="fn">generateDailyReport</span>() {
+  <span class="cm">// ① スプレッドシートからデータ取得</span>
+  <span class="kw">const</span> <span class="var">ss</span>          = SpreadsheetApp.<span class="fn">openById</span>(<span class="var">SHEET_ID</span>);
+  <span class="kw">const</span> <span class="var">tankSheet</span>   = ss.<span class="fn">getSheetByName</span>(<span class="str">'タンク管理'</span>);
+  <span class="kw">const</span> <span class="var">shippingSheet</span> = ss.<span class="fn">getSheetByName</span>(<span class="str">'出荷在庫'</span>);
+
+  <span class="kw">const</span> <span class="var">tankData</span>     = <span class="fn">getSheetData</span>(<span class="var">tankSheet</span>);
+  <span class="kw">const</span> <span class="var">shippingData</span> = <span class="fn">getSheetData</span>(<span class="var">shippingSheet</span>);
+  <span class="kw">const</span> <span class="var">today</span>        = <span class="kw">new</span> <span class="fn">Date</span>().<span class="fn">toLocaleDateString</span>(<span class="str">'ja-JP'</span>);
+
+  <span class="cm">// ② Claude APIへリクエスト</span>
+  <span class="kw">const</span> <span class="var">prompt</span> = <span class="str">`以下は${today}の酒造工場の日次データです。
+タンク管理：${JSON.stringify(tankData)}
+出荷在庫：${JSON.stringify(shippingData)}
+
+醸造長向けの日次レポートを作成してください。
+・発酵異常・温度異常のアラートがあれば最優先で記載
+・当日の出荷実績と在庫サマリー
+・翌日の注意事項
+300文字以内で簡潔に。`</span>;
+
+  <span class="kw">const</span> <span class="var">response</span> = UrlFetchApp.<span class="fn">fetch</span>(<span class="str">'https://api.anthropic.com/v1/messages'</span>, {
+    method:  <span class="str">'post'</span>,
+    headers: {
+      <span class="str">'x-api-key'</span>:         <span class="var">CLAUDE_API_KEY</span>,
+      <span class="str">'anthropic-version'</span>: <span class="str">'2023-06-01'</span>,
+      <span class="str">'content-type'</span>:      <span class="str">'application/json'</span>
+    },
+    payload: JSON.<span class="fn">stringify</span>({
+      model:      <span class="str">'claude-sonnet-4-20250514'</span>,
+      max_tokens: <span class="var">1000</span>,
+      messages:   [{ role: <span class="str">'user'</span>, content: <span class="var">prompt</span> }]
+    })
+  });
+
+  <span class="kw">const</span> <span class="var">report</span> = JSON.<span class="fn">parse</span>(<span class="var">response</span>.<span class="fn">getContentText</span>())
+                     .content[<span class="var">0</span>].text;
+
+  <span class="cm">// ③ Slackへ送信</span>
+  UrlFetchApp.<span class="fn">fetch</span>(<span class="var">SLACK_WEBHOOK</span>, {
+    method:  <span class="str">'post'</span>,
+    payload: JSON.<span class="fn">stringify</span>({
+      text: <span class="str">`*📊 日次レポート ${today}*\n\n`</span> + <span class="var">report</span>
+    })
+  });
+
+  <span class="cm">// ④ ログをスプレッドシートに保存</span>
+  <span class="kw">const</span> <span class="var">logSheet</span> = ss.<span class="fn">getSheetByName</span>(<span class="str">'送信ログ'</span>);
+  <span class="var">logSheet</span>.<span class="fn">appendRow</span>([<span class="kw">new</span> <span class="fn">Date</span>(), <span class="str">'Slack'</span>, <span class="str">'送信完了'</span>, <span class="var">report</span>]);
+}
+
+<span class="kw">function</span> <span class="fn">getSheetData</span>(<span class="var">sheet</span>) {
+  <span class="kw">const</span> <span class="var">data</span>    = <span class="var">sheet</span>.<span class="fn">getDataRange</span>().<span class="fn">getValues</span>();
+  <span class="kw">const</span> <span class="var">headers</span> = <span class="var">data</span>.<span class="fn">shift</span>();
+  <span class="kw">return</span> <span class="var">data</span>.<span class="fn">map</span>(<span class="var">row</span> => <span class="fn">Object</span>.<span class="fn">fromEntries</span>(
+    <span class="var">headers</span>.<span class="fn">map</span>((<span class="var">h</span>, <span class="var">i</span>) => [<span class="var">h</span>, <span class="var">row</span>[<span class="var">i</span>]])
+  ));
+}</pre>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+async function generateReport() {
+  const btn = document.getElementById('gen-btn');
+  const loading = document.getElementById('loading-bar');
+  const reportCard = document.getElementById('report-card');
+  const reportText = document.getElementById('report-text');
+  const reportTimestamp = document.getElementById('report-timestamp');
+  const errorBox = document.getElementById('error-box');
+  const sentMsg = document.getElementById('sent-msg');
+
+  btn.disabled = true;
+  loading.classList.add('active');
+  reportCard.classList.remove('visible');
+  errorBox.classList.remove('visible');
+  sentMsg.classList.remove('visible');
+
+  const date = document.getElementById('report-date').value;
+  const brewery = document.getElementById('brewery-select').value === 'matsui' ? '松井酒造合名会社' : 'デモ蔵元';
+
+  const tankData = [
+    { タンクID: 'T-01', 銘柄: '純米吟醸 山田錦', 経過日数: 18, 品温: 12.4, アルコール度: 14.2, 日本酒度: '+3.0', 状態: '正常' },
+    { タンクID: 'T-02', 銘柄: '本醸造 辛口',     経過日数: 32, 品温: 9.8,  アルコール度: 16.8, 日本酒度: '+8.5', 状態: '正常' },
+    { タンクID: 'T-03', 銘柄: '特別純米 雄町',   経過日数: 5,  品温: 14.9, アルコール度: 3.1,  日本酒度: '-12.0', 状態: '要観察（品温やや高め）' },
+    { タンクID: 'T-04', 銘柄: '大吟醸 斗瓶囲',   経過日数: 45, 品温: 8.2,  アルコール度: 17.5, 日本酒度: '+5.0', 状態: '正常' },
+    { タンクID: 'T-05', 銘柄: 'にごり酒 活性',   経過日数: 12, 品温: 17.3, アルコール度: 9.8,  日本酒度: '-18.5', 状態: '要確認（品温17.3°C 上昇中）' }
+  ];
+
+  const shippingData = [
+    { 品名: '純米吟醸 720ml',  本日出荷: 48, 当月累計: 612, 在庫残: 384, 前月比: '+12%' },
+    { 品名: '本醸造辛口 1800ml', 本日出荷: 30, 当月累計: 408, 在庫残: 210, 前月比: '-3%' },
+    { 品名: '大吟醸 720ml',    本日出荷: 12, 当月累計: 96,  在庫残: 144, 前月比: '+8%' }
+  ];
+
+  const prompt = `あなたは酒造工場の業務支援AIです。以下は${date}（${brewery}）の日次生産データです。
+
+【タンク管理データ】
+${JSON.stringify(tankData, null, 2)}
+
+【出荷・在庫データ】
+${JSON.stringify(shippingData, null, 2)}
+
+醸造長・工場長向けの日次レポートを作成してください。以下の構成でお願いします：
+
+■ 本日のアラート
+（異常・要確認事項を最優先で簡潔に）
+
+■ 発酵状況サマリー
+（各タンクの状態を一言で）
+
+■ 出荷・在庫サマリー
+（数字を交えて簡潔に）
+
+■ 明日の対応事項
+（具体的なアクションを1〜2点）
+
+全体で350文字以内。敬語・丁寧語で。`;
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    const data = await response.json();
+
+    if (data.content && data.content[0]) {
+      const text = data.content[0].text;
+      loading.classList.remove('active');
+      reportCard.classList.add('visible');
+
+      const now = new Date();
+      reportTimestamp.textContent = `生成: ${now.toLocaleTimeString('ja-JP')} — ${brewery}`;
+
+      // Typewriter effect
+      reportText.textContent = '';
+      let i = 0;
+      const interval = setInterval(() => {
+        reportText.textContent += text[i];
+        i++;
+        if (i >= text.length) clearInterval(interval);
+      }, 12);
+
+    } else {
+      throw new Error(data.error?.message || 'APIエラーが発生しました');
+    }
+  } catch (err) {
+    loading.classList.remove('active');
+    errorBox.textContent = `⚠ ${err.message}`;
+    errorBox.classList.add('visible');
+  }
+
+  btn.disabled = false;
+}
+
+function simulateSend(channel) {
+  const sentMsg = document.getElementById('sent-msg');
+  sentMsg.textContent = `✓ ${channel}への送信完了（${new Date().toLocaleTimeString('ja-JP')}）`;
+  sentMsg.classList.add('visible');
+  setTimeout(() => sentMsg.classList.remove('visible'), 3000);
+}
+
+function copyCode() {
+  const code = document.getElementById('code-block').innerText;
+  navigator.clipboard.writeText(code).then(() => {
+    const btn = document.querySelector('.code-copy');
+    btn.textContent = 'コピー完了';
+    setTimeout(() => btn.textContent = 'コピー', 2000);
+  });
+}
+</script>
+</body>
+</html>
