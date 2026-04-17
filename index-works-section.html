@@ -1,0 +1,171 @@
+<!-- ===== ここをindex.htmlの terminal-section の </section> の直後に追加 ===== -->
+<!-- PORTFOLIO WORKS SECTION -->
+<section class="works-section" id="works">
+  <div style="max-width: 1100px; margin: 0 auto; padding: 0 0 0 0;">
+    <div class="section-label">// portfolio works</div>
+    <h2 class="section-title">実際に作ったもの</h2>
+    <p class="section-desc">すべて Claude API を使って実際に動くデモです。</p>
+
+    <div class="works-grid">
+      <!-- Work #01 -->
+      <div class="work-card">
+        <div class="work-card-header">
+          <span class="work-num">01</span>
+          <span class="work-industry">酒造業</span>
+        </div>
+        <h3 class="work-title">社内FAQエージェント</h3>
+        <p class="work-desc">
+          酒造現場の「なぜこの工程が必要か」「この温度管理の根拠は？」といった
+          ベテランの知見をAIが即答。新人育成コストの削減と技術継承を同時に解決。
+        </p>
+        <div class="work-tags">
+          <span class="tag">Claude API</span>
+          <span class="tag">RAG</span>
+          <span class="tag">社内ナレッジ</span>
+        </div>
+        <a href="sake-faq-agent.html" target="_blank" class="work-link">
+          デモを見る →
+        </a>
+      </div>
+
+      <!-- Work #02 -->
+      <div class="work-card work-card-new">
+        <div class="work-card-header">
+          <span class="work-num">02</span>
+          <span class="work-industry">酒造業</span>
+          <span class="work-badge-new">NEW</span>
+        </div>
+        <h3 class="work-title">日次レポート自動生成</h3>
+        <p class="work-desc">
+          タンク管理・出荷在庫のスプレッドシートを毎朝自動読み込み。
+          Claude APIがサマリーを生成してSlack・メールで自動送信。
+          醸造長の朝の確認作業を30分→ゼロに。
+        </p>
+        <div class="work-tags">
+          <span class="tag">GAS</span>
+          <span class="tag">Claude API</span>
+          <span class="tag">Slack連携</span>
+          <span class="tag">定期実行</span>
+        </div>
+        <a href="daily-report-agent.html" target="_blank" class="work-link">
+          デモを見る →
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 以下のスタイルを <style> タグ内（既存CSSの末尾）に追加 ===== -->
+<style id="works-section-styles">
+.works-section {
+  padding: 80px 48px;
+  background: var(--bg);
+  border-top: 1px solid var(--border);
+}
+
+.works-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 20px;
+  margin-top: 48px;
+  max-width: 1100px;
+}
+
+.work-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  padding: 28px;
+  position: relative;
+  transition: all 0.3s;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.work-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  height: 2px;
+  width: 0;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  transition: width 0.4s;
+}
+
+.work-card:hover::before { width: 100%; }
+.work-card:hover { border-color: rgba(0,229,176,0.2); transform: translateY(-4px); }
+
+.work-card-new {
+  border-color: rgba(0,229,176,0.15);
+}
+
+.work-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.work-num {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--accent);
+  background: rgba(0,229,176,0.08);
+  border: 1px solid rgba(0,229,176,0.2);
+  padding: 2px 8px;
+  letter-spacing: 0.1em;
+}
+
+.work-industry {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text2);
+  letter-spacing: 0.08em;
+}
+
+.work-badge-new {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: #08080f;
+  background: var(--accent);
+  padding: 2px 6px;
+  letter-spacing: 0.1em;
+  margin-left: auto;
+}
+
+.work-title {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.work-desc {
+  font-size: 13px;
+  color: var(--text2);
+  line-height: 1.8;
+  flex: 1;
+}
+
+.work-link {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--accent);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(0,229,176,0.3);
+  padding-bottom: 2px;
+  transition: all 0.2s;
+  align-self: flex-start;
+  margin-top: 4px;
+}
+
+.work-link:hover {
+  border-color: var(--accent);
+  color: #00ffcc;
+}
+
+@media (max-width: 768px) {
+  .works-section { padding: 60px 24px; }
+  .works-grid { grid-template-columns: 1fr; }
+}
+</style>
