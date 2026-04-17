@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>日次レポート自動生成エージェント | 業務自動化デモ</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Noto+Sans+JP:wght@400;500;700&display=swap');
+
+  :root {
+    --bg: #0a0c10;
+    --surface: #111418;
+    --surface2: #181c22;
+    --border: #2a2f3a;
+    --accent: #00d9a3;
+    --accent2: #0099ff;
+    --text: #e2e8f0;
+    --text-muted: #64748b;
+    --text-dim: #94a3b8;
+    --danger: #ff4757;
+    --warn: #ffa502;
+    --yellow: #ffd32a;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Sans JP', sans-serif;
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    border-bottom: 1px solid var(--border);
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--surface);
+  }
+  .hd { width: 10px; height: 10px; border-radius: 50%; }
+  .hd-r { background: #ff5f57; }
+  .hd-y { background: #ffbd2e; }
+  .hd-g { background: #28c840; }
+  .header-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--text-dim);
+    margin-left: 8px;
+  }
+  .live-badge {
+    margin-left: auto;
+    background: rgba(0,217,163,0.12);
+    border: 1px solid rgba(0,217,163,0.4);
+    color: var(--accent);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 4px;
+    letter-spacing: 1px;
+  }
+  .live-badge::before { content: '● '; }
+
+  /* ── LAYOUT ── */
+  .container { max-width: 960px; margin: 0 auto; padding: 32px 20px 48px; }
+
+  .page-title { text-align: center; margin-bottom: 8px; }
+  .page-title h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
+  .page-title p { color: var(--text-muted); font-size: 13px; margin-top: 6px; }
+
+  /* ── INDUSTRY BAR ── */
+  .industry-bar {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin: 24px 0;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+  .industry-bar label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--accent);
+    white-space: nowrap;
+  }
+  .industry-bar label::before { content: '$ industry='; }
+  .industry-select {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    padding: 8px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    flex: 1;
+    min-width: 180px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .industry-select:focus { border-color: var(--accent); }
+  .industry-select option { background: #1a1e24; }
+  .industry-tag {
+    background: rgba(0,217,163,0.08);
+    border: 1px solid rgba(0,217,163,0.25);
+    color: var(--accent);
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ── MAIN GRID ── */
+  .main-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  @media (max-width: 700px) { .main-grid { grid-template-columns: 1fr; } }
+
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px;
+  }
+  .panel-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .panel-title span { color: var(--text-muted); font-size: 10px; }
+
+  /* ── DATA INPUT FIELDS ── */
+  .field-group { margin-bottom: 14px; }
+  .field-group label {
+    font-size: 12px;
+    color: var(--text-muted);
+    display: block;
+    margin-bottom: 5px;
+  }
+  .field-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .field-item { display: flex; flex-direction: column; gap: 4px; }
+  .field-item label { font-size: 11px; color: var(--text-muted); }
+
+  .data-input {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .data-input:focus { border-color: var(--accent2); }
+
+  .textarea-input {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 13px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    outline: none;
+    resize: vertical;
+    min-height: 80px;
+    transition: border-color 0.2s;
+  }
+  .textarea-input:focus { border-color: var(--accent2); }
+  .textarea-input::placeholder { color: var(--text-muted); font-size: 12px; }
+
+  /* ── GENERATE BTN ── */
+  .gen-btn {
+    width: 100%;
+    background: var(--accent);
+    border: none;
+    color: #000;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    padding: 13px;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 4px;
+    transition: opacity 0.2s, transform 0.1s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .gen-btn:hover { opacity: 0.85; }
+  .gen-btn:active { transform: scale(0.98); }
+  .gen-btn:disabled { opacity: 0.4; cursor: default; }
+
+  /* ── OUTPUT PANEL (full width) ── */
+  .output-wrap { margin-top: 16px; }
+
+  .output-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .output-header {
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--text-dim);
+  }
+  .output-header-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: rgba(0,217,163,0.5);
+  }
+  .output-header .status {
+    margin-left: auto;
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+  .output-header .status.generating { color: var(--warn); }
+  .output-header .status.done { color: var(--accent); }
+
+  .output-body {
+    padding: 20px;
+    min-height: 260px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    line-height: 1.8;
+    color: var(--text-dim);
+    white-space: pre-wrap;
+    position: relative;
+  }
+  .output-placeholder {
+    color: var(--text-muted);
+    font-style: italic;
+    font-size: 13px;
+    text-align: center;
+    margin-top: 60px;
+  }
+  .output-text { color: var(--text); }
+
+  /* progress bar */
+  .progress-bar {
+    height: 2px;
+    background: var(--border);
+    overflow: hidden;
+    display: none;
+  }
+  .progress-bar.active { display: block; }
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    width: 0%;
+    transition: width 0.3s;
+  }
+
+  /* copy btn */
+  .copy-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    padding: 4px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .copy-btn:hover { border-color: var(--accent2); color: var(--accent2); }
+
+  /* metrics strip */
+  .metrics-strip {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+  }
+  .metric-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 14px;
+    text-align: center;
+    flex: 1;
+    min-width: 100px;
+  }
+  .metric-card .val {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--accent);
+  }
+  .metric-card .lbl {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  /* ── FOOTER ── */
+  .page-footer {
+    text-align: center;
+    margin-top: 32px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+  }
+  .page-footer p { color: var(--text-muted); font-size: 12px; line-height: 1.8; }
+  .page-footer a { color: var(--accent); text-decoration: none; }
+  .page-footer a:hover { text-decoration: underline; }
+
+  /* spinner */
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .spinner {
+    display: inline-block;
+    width: 14px; height: 14px;
+    border: 2px solid rgba(0,0,0,0.3);
+    border-top-color: #000;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="hd hd-r"></div>
+  <div class="hd hd-y"></div>
+  <div class="hd hd-g"></div>
+  <span class="header-title">report_agent.py -- 日次レポート自動生成エージェント</span>
+  <div class="live-badge">LIVE</div>
+</div>
+
+<div class="container">
+
+  <div class="page-title">
+    <h1>日次レポート 自動生成エージェント</h1>
+    <p>数値を入力するだけで、AIが業種に合わせた日次報告書を自動作成します。</p>
+  </div>
+
+  <!-- INDUSTRY SELECTOR -->
+  <div class="industry-bar">
+    <label></label>
+    <select class="industry-select" id="industrySelect" onchange="switchIndustry()">
+      <option value="manufacturing">酒造・食品製造</option>
+      <option value="retail">小売・EC</option>
+      <option value="realestate">不動産</option>
+      <option value="consulting">士業・コンサル</option>
+      <option value="restaurant">飲食・サービス</option>
+    </select>
+    <span class="industry-tag" id="industryTag">製造業向けデモ</span>
+  </div>
+
+  <!-- METRICS STRIP -->
+  <div class="metrics-strip" id="metricsStrip"></div>
+
+  <div style="margin-top:16px">
+    <div class="main-grid">
+      <!-- INPUT PANEL -->
+      <div class="panel">
+        <div class="panel-title">
+          データ入力
+          <span id="todayDate"></span>
+        </div>
+        <div id="inputFields"></div>
+        <button class="gen-btn" id="genBtn" onclick="generateReport()">
+          <span id="genBtnText">レポートを生成</span>
+        </button>
+      </div>
+
+      <!-- NOTE PANEL -->
+      <div class="panel">
+        <div class="panel-title">特記事項・メモ</div>
+        <textarea
+          class="textarea-input"
+          id="noteInput"
+          placeholder="今日の特記事項、トラブル、改善点などを自由に入力..."
+          style="min-height:160px"
+        ></textarea>
+        <div class="field-group" style="margin-top:14px;margin-bottom:0">
+          <label>明日の予定・対応事項</label>
+          <textarea
+            class="textarea-input"
+            id="tomorrowInput"
+            placeholder="明日の重要タスク、アポ、確認事項など..."
+            style="min-height:80px"
+          ></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OUTPUT -->
+  <div class="output-wrap">
+    <div class="output-panel">
+      <div class="output-header">
+        <div class="output-header-dot"></div>
+        <span>generated_report.txt</span>
+        <span class="status" id="outputStatus">待機中</span>
+        <button class="copy-btn" onclick="copyReport()">コピー</button>
+      </div>
+      <div class="progress-bar" id="progressBar">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+      <div class="output-body" id="outputBody">
+        <div class="output-placeholder" id="outputPlaceholder">
+          データを入力して「レポートを生成」を押してください。<br>
+          AIが業種に合わせた報告書を自動作成します。
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <p>
+      このデモはClaudeAPIを使ったリアルタイム生成です。<br>
+      実際の導入ではスプレッドシートやPOSシステムと連携し、ボタン1つで自動集計・送信できます。<br>
+      <a href="/">← ポートフォリオに戻る</a>
+    </p>
+  </div>
+
+</div>
+
+<script>
+const today = new Date();
+const todayStr = `${today.getFullYear()}/${String(today.getMonth()+1).padStart(2,'0')}/${String(today.getDate()).padStart(2,'0')} (${['日','月','火','水','木','金','土'][today.getDay()]})`;
+
+document.getElementById('todayDate').textContent = todayStr;
+
+// ─── INDUSTRY CONFIG ────────────────────────────────────
+const INDUSTRIES = {
+  manufacturing: {
+    tag: '製造業向けデモ',
+    metrics: [
+      { label: '生産量', val: '--', unit: 'L/箱' },
+      { label: '稼働率', val: '--', unit: '%' },
+      { label: '不良率', val: '--', unit: '%' },
+    ],
+    fields: [
+      { id: 'production',  label: '生産量（L / 箱数）', placeholder: '例: 1200L / 240箱', type: 'text' },
+      { id: 'operation',   label: '設備稼働率（%）',     placeholder: '例: 95', type: 'number' },
+      { id: 'defect',      label: '不良・廃棄数',         placeholder: '例: 3箱', type: 'text' },
+      { id: 'workers',     label: '出勤人数',             placeholder: '例: 12人', type: 'text' },
+    ],
+    systemPrompt: `あなたは食品・酒造製造会社の業務報告書ライターです。
+以下のデータから、本日の日次業務報告書を作成してください。
+フォーマット:
+【{日付} 日次業務報告書】
+1. 本日の生産実績
+2. 品質・設備状況
+3. 特記事項・トラブル
+4. 明日の予定・対応事項
+5. 所感
+300〜400字程度で、現場担当者が読んでわかりやすい文体で作成してください。`,
+  },
+  retail: {
+    tag: '小売・EC向けデモ',
+    metrics: [
+      { label: '売上', val: '--', unit: '万円' },
+      { label: '受注数', val: '--', unit: '件' },
+      { label: '返品数', val: '--', unit: '件' },
+    ],
+    fields: [
+      { id: 'sales',       label: '本日売上（円）',       placeholder: '例: 285000', type: 'number' },
+      { id: 'orders',      label: '受注件数',             placeholder: '例: 47', type: 'number' },
+      { id: 'returns',     label: '返品・問い合わせ数',   placeholder: '例: 2件', type: 'text' },
+      { id: 'stock',       label: '欠品・在庫アラート品', placeholder: '例: 商品A（残3個）', type: 'text' },
+    ],
+    systemPrompt: `あなたは小売・EC事業者の業務報告書ライターです。
+以下のデータから、本日の日次業務報告書を作成してください。
+フォーマット:
+【{日付} 日次業務報告書】
+1. 本日の売上・受注実績
+2. 在庫・返品状況
+3. 特記事項・対応内容
+4. 明日の優先対応
+5. 所感
+300〜400字程度で、マネージャーが確認しやすい文体で作成してください。`,
+  },
+  realestate: {
+    tag: '不動産向けデモ',
+    metrics: [
+      { label: '内見件数', val: '--', unit: '件' },
+      { label: '新規問合', val: '--', unit: '件' },
+      { label: '契約', val: '--', unit: '件' },
+    ],
+    fields: [
+      { id: 'naiken',      label: '内見件数',             placeholder: '例: 5', type: 'number' },
+      { id: 'inquiry',     label: '新規問い合わせ数',     placeholder: '例: 8', type: 'number' },
+      { id: 'contract',    label: '成約・申込件数',       placeholder: '例: 1', type: 'number' },
+      { id: 'followup',    label: 'フォローアップ中の顧客数', placeholder: '例: 14組', type: 'text' },
+    ],
+    systemPrompt: `あなたは不動産会社の業務報告書ライターです。
+以下のデータから、本日の日次業務報告書を作成してください。
+フォーマット:
+【{日付} 日次業務報告書】
+1. 本日の活動実績（内見・問い合わせ・成約）
+2. フォロー状況
+3. 特記事項・課題
+4. 明日の予定
+5. 所感
+300〜400字程度で、営業管理者向けに作成してください。`,
+  },
+  consulting: {
+    tag: '士業・コンサル向けデモ',
+    metrics: [
+      { label: '対応件数', val: '--', unit: '件' },
+      { label: '新規相談', val: '--', unit: '件' },
+      { label: '締切対応', val: '--', unit: '件' },
+    ],
+    fields: [
+      { id: 'cases',       label: '対応案件数',           placeholder: '例: 8', type: 'number' },
+      { id: 'newclient',   label: '新規相談件数',         placeholder: '例: 2', type: 'number' },
+      { id: 'deadline',    label: '期限対応件数',         placeholder: '例: 3', type: 'number' },
+      { id: 'billing',     label: '本日の請求・見積り発行', placeholder: '例: 2件（計15万円）', type: 'text' },
+    ],
+    systemPrompt: `あなたは士業・コンサルティング事務所の業務報告書ライターです。
+以下のデータから、本日の日次業務報告書を作成してください。
+フォーマット:
+【{日付} 日次業務報告書】
+1. 本日の対応実績
+2. 新規相談・受注状況
+3. 期限管理・進捗
+4. 明日の優先業務
+5. 所感
+300〜400字程度で、所長・マネージャー向けに作成してください。`,
+  },
+  restaurant: {
+    tag: '飲食・サービス向けデモ',
+    metrics: [
+      { label: '売上', val: '--', unit: '万円' },
+      { label: '客数', val: '--', unit: '人' },
+      { label: '客単価', val: '--', unit: '円' },
+    ],
+    fields: [
+      { id: 'sales',       label: '本日売上（円）',       placeholder: '例: 185000', type: 'number' },
+      { id: 'customers',   label: '来客数（人）',         placeholder: '例: 62', type: 'number' },
+      { id: 'staff',       label: '出勤スタッフ数',       placeholder: '例: 6人', type: 'text' },
+      { id: 'waste',       label: '廃棄・ロス状況',       placeholder: '例: 仕込み残り3食分', type: 'text' },
+    ],
+    systemPrompt: `あなたは飲食・サービス業の業務報告書ライターです。
+以下のデータから、本日の日次業務報告書を作成してください。
+フォーマット:
+【{日付} 日次業務報告書】
+1. 本日の営業実績（売上・客数・客単価）
+2. スタッフ・オペレーション状況
+3. 特記事項・クレーム・ロス
+4. 明日の準備・対応事項
+5. 所感
+300〜400字程度で、店長・オーナーが確認しやすい文体で作成してください。`,
+  },
+};
+
+let currentIndustry = 'manufacturing';
+let lastReport = '';
+
+// ─── INIT ──────────────────────────────────────────────
+function init() {
+  switchIndustry();
+}
+
+function switchIndustry() {
+  const sel = document.getElementById('industrySelect');
+  currentIndustry = sel.value;
+  const cfg = INDUSTRIES[currentIndustry];
+
+  document.getElementById('industryTag').textContent = cfg.tag;
+  renderFields(cfg.fields);
+  renderMetrics(cfg.metrics);
+  resetOutput();
+}
+
+function renderFields(fields) {
+  const container = document.getElementById('inputFields');
+  container.innerHTML = '';
+  const grid = document.createElement('div');
+  grid.className = 'field-row';
+  grid.style.marginBottom = '12px';
+
+  fields.forEach(f => {
+    const item = document.createElement('div');
+    item.className = 'field-item';
+    item.innerHTML = `
+      <label for="field_${f.id}">${f.label}</label>
+      <input
+        type="${f.type}"
+        id="field_${f.id}"
+        class="data-input"
+        placeholder="${f.placeholder}"
+        onchange="updateMetric('${f.id}', this.value)"
+      >
+    `;
+    grid.appendChild(item);
+  });
+  container.appendChild(grid);
+}
+
+function updateMetric(fieldId, val) {
+  const cfg = INDUSTRIES[currentIndustry];
+  const metricMap = {
+    production: 0, sales: 0,   naiken: 0,   cases: 0,    customers: 0,
+    operation:  1, orders: 1,  inquiry: 1,  newclient: 1, staff: 1,
+    defect:     2, returns: 2, contract: 2, deadline: 2,  waste: 2,
+  };
+  const idx = metricMap[fieldId];
+  if (idx === undefined) return;
+  const cards = document.querySelectorAll('.metric-card .val');
+  if (cards[idx]) cards[idx].textContent = val || '--';
+}
+
+function renderMetrics(metrics) {
+  const strip = document.getElementById('metricsStrip');
+  strip.innerHTML = '';
+  metrics.forEach(m => {
+    const card = document.createElement('div');
+    card.className = 'metric-card';
+    card.innerHTML = `
+      <div class="val">${m.val}</div>
+      <div class="lbl">${m.label}（${m.unit}）</div>
+    `;
+    strip.appendChild(card);
+  });
+}
+
+function resetOutput() {
+  document.getElementById('outputBody').innerHTML = `
+    <div class="output-placeholder" id="outputPlaceholder">
+      データを入力して「レポートを生成」を押してください。<br>
+      AIが業種に合わせた報告書を自動作成します。
+    </div>
+  `;
+  document.getElementById('outputStatus').textContent = '待機中';
+  document.getElementById('outputStatus').className = 'status';
+  document.getElementById('progressBar').classList.remove('active');
+  lastReport = '';
+}
+
+// ─── GENERATE ──────────────────────────────────────────
+async function generateReport() {
+  const cfg = INDUSTRIES[currentIndustry];
+  const genBtn = document.getElementById('genBtn');
+  const genBtnText = document.getElementById('genBtnText');
+
+  // Collect data
+  const data = {};
+  cfg.fields.forEach(f => {
+    const el = document.getElementById(`field_${f.id}`);
+    if (el) data[f.label] = el.value || '（未入力）';
+  });
+  const note = document.getElementById('noteInput').value;
+  const tomorrow = document.getElementById('tomorrowInput').value;
+
+  // Build prompt
+  const dataText = Object.entries(data)
+    .map(([k, v]) => `・${k}：${v}`)
+    .join('\n');
+  const userPrompt = `
+日付：${todayStr}
+業種：${cfg.tag}
+
+【本日のデータ】
+${dataText}
+
+【特記事項・メモ】
+${note || '（なし）'}
+
+【明日の予定・対応事項】
+${tomorrow || '（未記入）'}
+
+上記のデータをもとに、日次業務報告書を作成してください。
+`;
+
+  genBtn.disabled = true;
+  genBtnText.innerHTML = '<span class="spinner"></span> 生成中...';
+
+  const statusEl = document.getElementById('outputStatus');
+  const bodyEl = document.getElementById('outputBody');
+  const progressBar = document.getElementById('progressBar');
+  const progressFill = document.getElementById('progressFill');
+
+  statusEl.textContent = '生成中...';
+  statusEl.className = 'status generating';
+  progressBar.classList.add('active');
+
+  // animate progress
+  let pct = 0;
+  const pInterval = setInterval(() => {
+    pct = Math.min(pct + Math.random() * 8, 85);
+    progressFill.style.width = pct + '%';
+  }, 200);
+
+  bodyEl.innerHTML = '<div class="output-placeholder">生成中です。少しお待ちください...</div>';
+
+  try {
+    const response = await fetch('/api/report', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        system: cfg.systemPrompt,
+        messages: [{ role: 'user', content: userPrompt }],
+      }),
+    });
+
+    const result = await response.json();
+    const reportText = result.content?.[0]?.text || result.error || 'エラーが発生しました';
+
+    clearInterval(pInterval);
+    progressFill.style.width = '100%';
+    setTimeout(() => { progressBar.classList.remove('active'); progressFill.style.width = '0%'; }, 400);
+
+    lastReport = reportText;
+    bodyEl.innerHTML = `<div class="output-text">${escapeHtml(reportText)}</div>`;
+    statusEl.textContent = '生成完了';
+    statusEl.className = 'status done';
+
+  } catch (err) {
+    clearInterval(pInterval);
+    progressBar.classList.remove('active');
+    bodyEl.innerHTML = '<div class="output-placeholder">エラーが発生しました。再試行してください。</div>';
+    statusEl.textContent = 'エラー';
+    statusEl.className = 'status';
+  }
+
+  genBtn.disabled = false;
+  genBtnText.textContent = 'レポートを生成';
+}
+
+function copyReport() {
+  if (!lastReport) return;
+  navigator.clipboard.writeText(lastReport).then(() => {
+    const btn = document.querySelector('.copy-btn');
+    btn.textContent = 'コピー完了！';
+    setTimeout(() => { btn.textContent = 'コピー'; }, 2000);
+  });
+}
+
+function escapeHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+init();
+</script>
+</body>
+</html>

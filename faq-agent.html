@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>社内FAQ自動応答エージェント | 業務自動化デモ</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Noto+Sans+JP:wght@400;500;700&display=swap');
+
+  :root {
+    --bg: #0a0c10;
+    --surface: #111418;
+    --surface2: #181c22;
+    --border: #2a2f3a;
+    --accent: #00d9a3;
+    --accent2: #0099ff;
+    --text: #e2e8f0;
+    --text-muted: #64748b;
+    --text-dim: #94a3b8;
+    --danger: #ff4757;
+    --warn: #ffa502;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Sans JP', sans-serif;
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    border-bottom: 1px solid var(--border);
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--surface);
+  }
+  .header-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .d-red   { background: #ff5f57; }
+  .d-yellow{ background: #ffbd2e; }
+  .d-green { background: #28c840; }
+  .header-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--text-dim);
+    margin-left: 8px;
+  }
+  .live-badge {
+    margin-left: auto;
+    background: rgba(0,217,163,0.12);
+    border: 1px solid rgba(0,217,163,0.4);
+    color: var(--accent);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 4px;
+    letter-spacing: 1px;
+  }
+  .live-badge::before { content: '● '; }
+
+  /* ── LAYOUT ── */
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 32px 20px 48px;
+  }
+
+  .page-title {
+    text-align: center;
+    margin-bottom: 8px;
+  }
+  .page-title h1 {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.5px;
+  }
+  .page-title p {
+    color: var(--text-muted);
+    font-size: 13px;
+    margin-top: 6px;
+  }
+
+  /* ── INDUSTRY SELECTOR ── */
+  .industry-bar {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin: 24px 0;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+  .industry-bar label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--accent);
+    white-space: nowrap;
+  }
+  .industry-bar label::before { content: '$ industry='; }
+
+  .industry-select {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    padding: 8px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    flex: 1;
+    min-width: 180px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .industry-select:focus { border-color: var(--accent); }
+  .industry-select option { background: #1a1e24; }
+
+  .industry-tag {
+    background: rgba(0,217,163,0.08);
+    border: 1px solid rgba(0,217,163,0.25);
+    color: var(--accent);
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ── CHAT AREA ── */
+  .chat-wrapper {
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    gap: 16px;
+  }
+
+  @media (max-width: 680px) {
+    .chat-wrapper { grid-template-columns: 1fr; }
+  }
+
+  .chat-main {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  /* chat messages */
+  .chat-messages {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    height: 380px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    scroll-behavior: smooth;
+  }
+  .chat-messages::-webkit-scrollbar { width: 4px; }
+  .chat-messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+  .msg {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .msg-avatar {
+    width: 28px; height: 28px;
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .msg.user .msg-avatar { background: rgba(0,153,255,0.15); border: 1px solid rgba(0,153,255,0.3); }
+  .msg.bot  .msg-avatar { background: rgba(0,217,163,0.12); border: 1px solid rgba(0,217,163,0.3); }
+
+  .msg-body { flex: 1; }
+  .msg-name {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+  }
+  .msg.user .msg-name { color: #4da6ff; }
+  .msg.bot  .msg-name { color: var(--accent); }
+
+  .msg-text {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 13.5px;
+    line-height: 1.7;
+    white-space: pre-wrap;
+  }
+  .msg.user .msg-text { border-color: rgba(0,153,255,0.2); }
+
+  /* thinking */
+  .msg-thinking .msg-text {
+    color: var(--text-muted);
+    font-style: italic;
+    font-size: 12.5px;
+  }
+  .msg-thinking .dot-pulse {
+    display: inline-block;
+    animation: pulse 1.2s infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:0.3} 50%{opacity:1} }
+
+  /* input */
+  .chat-input-row {
+    display: flex;
+    gap: 8px;
+  }
+  .chat-input {
+    flex: 1;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 13.5px;
+    padding: 11px 14px;
+    border-radius: 8px;
+    outline: none;
+    transition: border-color 0.2s;
+    resize: none;
+    height: 44px;
+  }
+  .chat-input:focus { border-color: var(--accent2); }
+  .chat-input::placeholder { color: var(--text-muted); }
+
+  .send-btn {
+    background: var(--accent);
+    border: none;
+    color: #000;
+    font-weight: 700;
+    font-size: 13px;
+    padding: 0 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.1s;
+    white-space: nowrap;
+  }
+  .send-btn:hover { opacity: 0.85; }
+  .send-btn:active { transform: scale(0.97); }
+  .send-btn:disabled { opacity: 0.4; cursor: default; }
+
+  /* ── SIDEBAR ── */
+  .chat-sidebar { display: flex; flex-direction: column; gap: 12px; }
+
+  .sidebar-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+  }
+  .sidebar-panel h3 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+  }
+
+  .sample-btn {
+    display: block;
+    width: 100%;
+    text-align: left;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 12px;
+    padding: 9px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-bottom: 7px;
+    transition: border-color 0.2s, color 0.2s, background 0.2s;
+    line-height: 1.5;
+  }
+  .sample-btn:last-child { margin-bottom: 0; }
+  .sample-btn:hover {
+    border-color: var(--accent);
+    color: var(--text);
+    background: rgba(0,217,163,0.05);
+  }
+  .sample-btn::before { content: '→ '; color: var(--accent); font-size: 11px; }
+
+  /* info panel */
+  .info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    font-size: 12px;
+  }
+  .info-row:last-child { margin-bottom: 0; }
+  .info-label { color: var(--text-muted); }
+  .info-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+  }
+
+  /* ── FOOTER ── */
+  .page-footer {
+    text-align: center;
+    margin-top: 32px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+  }
+  .page-footer p {
+    color: var(--text-muted);
+    font-size: 12px;
+    line-height: 1.8;
+  }
+  .page-footer a {
+    color: var(--accent);
+    text-decoration: none;
+  }
+  .page-footer a:hover { text-decoration: underline; }
+
+  /* clear btn */
+  .clear-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    padding: 4px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .clear-btn:hover { border-color: var(--danger); color: var(--danger); }
+
+  .chat-top {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 4px;
+  }
+  .chat-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-dot d-red"></div>
+  <div class="header-dot d-yellow"></div>
+  <div class="header-dot d-green"></div>
+  <span class="header-title">faq_agent.py -- 社内FAQ自動応答エージェント</span>
+  <div class="live-badge">LIVE</div>
+</div>
+
+<div class="container">
+
+  <div class="page-title">
+    <h1>社内FAQ 自動応答エージェント</h1>
+    <p>業務マニュアル・社内ルールへの問い合わせをAIが即時回答。人的対応コストを削減します。</p>
+  </div>
+
+  <!-- INDUSTRY SELECTOR -->
+  <div class="industry-bar">
+    <label></label>
+    <select class="industry-select" id="industrySelect" onchange="switchIndustry()">
+      <option value="manufacturing">酒造・食品製造</option>
+      <option value="retail">小売・EC</option>
+      <option value="realestate">不動産</option>
+      <option value="consulting">士業・コンサル</option>
+      <option value="restaurant">飲食・サービス</option>
+    </select>
+    <span class="industry-tag" id="industryTag">製造業向けデモ</span>
+  </div>
+
+  <div class="chat-wrapper">
+
+    <div class="chat-main">
+      <div class="chat-top">
+        <span class="chat-label">// チャット</span>
+        <button class="clear-btn" onclick="clearChat()">履歴クリア</button>
+      </div>
+      <div class="chat-messages" id="chatMessages">
+        <!-- initial message injected by JS -->
+      </div>
+      <div class="chat-input-row">
+        <textarea
+          class="chat-input"
+          id="chatInput"
+          placeholder="質問を入力してください..."
+          onkeydown="handleKey(event)"
+        ></textarea>
+        <button class="send-btn" id="sendBtn" onclick="sendMessage()">送信</button>
+      </div>
+    </div>
+
+    <div class="chat-sidebar">
+      <div class="sidebar-panel">
+        <h3>サンプル質問</h3>
+        <div id="sampleQuestions"></div>
+      </div>
+
+      <div class="sidebar-panel">
+        <h3>エージェント情報</h3>
+        <div class="info-row">
+          <span class="info-label">モデル</span>
+          <span class="info-value">claude-sonnet</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">応答モード</span>
+          <span class="info-value">RAG想定</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">対応言語</span>
+          <span class="info-value">日本語</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">応答速度</span>
+          <span class="info-value" id="avgResponseTime">--ms</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <p>
+      このデモはClaudeAPIを使ったリアルタイム応答です。<br>
+      実際の導入では貴社のマニュアル・規程をRAGで読み込ませます。<br>
+      <a href="/">← ポートフォリオに戻る</a>
+    </p>
+  </div>
+
+</div>
+
+<script>
+// ─── INDUSTRY CONFIG ───────────────────────────────────
+const INDUSTRIES = {
+  manufacturing: {
+    tag: '製造業向けデモ',
+    system: `あなたは食品・酒造製造会社の社内FAQエージェントです。
+製造工程、品質管理、設備メンテナンス、安全衛生、衛生管理（HACCP）、労務管理に関する質問に答えます。
+回答は実務担当者が即使えるよう、具体的・簡潔に答えてください。
+知らないことは「マニュアル確認が必要です」と正直に答えてください。
+回答は日本語で、200字以内を目安にしてください。`,
+    greeting: `こんにちは。製造現場のFAQエージェントです。\n\n製造工程・品質管理・安全衛生・設備に関することなど、なんでも聞いてください。`,
+    samples: [
+      '仕込みタンクの洗浄手順は？',
+      '製品に異物が混入した場合の対応は？',
+      '新入社員の衛生教育はいつ行う？',
+      '設備の定期点検の頻度は？',
+      '製造記録の保管期間は？',
+    ],
+  },
+  retail: {
+    tag: '小売・EC向けデモ',
+    system: `あなたは小売・EC事業者の社内FAQエージェントです。
+在庫管理、注文処理、返品・交換対応、カスタマーサポート手順、物流、仕入れに関する質問に答えます。
+回答はスタッフが即使えるよう、具体的・簡潔にしてください。
+回答は日本語で、200字以内を目安にしてください。`,
+    greeting: `こんにちは。小売・EC業務のFAQエージェントです。\n\n在庫管理・注文処理・返品対応など、業務の疑問に答えます。`,
+    samples: [
+      '返品・交換の対応フローを教えて',
+      '在庫が欠品しそうな場合の対処は？',
+      '注文キャンセルはどのタイミングまで可能？',
+      'クレーム対応の基本手順は？',
+      '発送遅延が発生した場合の対応は？',
+    ],
+  },
+  realestate: {
+    tag: '不動産向けデモ',
+    system: `あなたは不動産会社の社内FAQエージェントです。
+物件管理、契約手続き、内見対応、重要事項説明、賃貸・売買業務に関する質問に答えます。
+法的な断言は避け、「詳細は宅建士に確認」など適切に案内してください。
+回答は日本語で、200字以内を目安にしてください。`,
+    greeting: `こんにちは。不動産業務のFAQエージェントです。\n\n物件管理・契約・内見対応など、日常業務の疑問にお答えします。`,
+    samples: [
+      '重要事項説明書の交付タイミングは？',
+      '内見後のフォローアップ連絡のタイミングは？',
+      '原状回復費用の負担範囲の考え方は？',
+      '契約更新の通知はいつまでに行う？',
+      '鍵の受け渡しの手順は？',
+    ],
+  },
+  consulting: {
+    tag: '士業・コンサル向けデモ',
+    system: `あなたは士業・コンサルティング事務所の社内FAQエージェントです。
+書類作成、顧客対応、手続き期限、費用見積り、業務フローに関する質問に答えます。
+個別の法的判断には「担当士業者に確認」と案内してください。
+回答は日本語で、200字以内を目安にしてください。`,
+    greeting: `こんにちは。士業・コンサル業務のFAQエージェントです。\n\n書類作成・手続き期限・顧客対応など、事務所業務の疑問にお答えします。`,
+    samples: [
+      '法人設立に必要な書類一覧は？',
+      '顧問契約の更新通知はいつ送る？',
+      '相談料の見積り方針は？',
+      'クライアントへの報告書の提出頻度は？',
+      '電子申請で使うツールは？',
+    ],
+  },
+  restaurant: {
+    tag: '飲食・サービス向けデモ',
+    system: `あなたは飲食・サービス業の社内FAQエージェントです。
+衛生管理、接客手順、シフト管理、クレーム対応、メニュー管理、食材仕入れに関する質問に答えます。
+回答はスタッフが即使えるよう、具体的・簡潔にしてください。
+回答は日本語で、200字以内を目安にしてください。`,
+    greeting: `こんにちは。飲食・サービス業務のFAQエージェントです。\n\n衛生管理・接客対応・シフトなど、現場の疑問にお答えします。`,
+    samples: [
+      '食品アレルギーの確認手順は？',
+      'クレーム客への対応の基本は？',
+      '食材の鮮度チェックの頻度は？',
+      'シフト変更の申請期限は？',
+      '体調不良スタッフの当日欠勤対応は？',
+    ],
+  },
+};
+
+let currentIndustry = 'manufacturing';
+let conversationHistory = [];
+let responseTimes = [];
+
+// ─── INIT ──────────────────────────────────────────────
+function init() {
+  switchIndustry();
+}
+
+function switchIndustry() {
+  const sel = document.getElementById('industrySelect');
+  currentIndustry = sel.value;
+  const cfg = INDUSTRIES[currentIndustry];
+
+  document.getElementById('industryTag').textContent = cfg.tag;
+
+  // reset chat
+  conversationHistory = [];
+  const box = document.getElementById('chatMessages');
+  box.innerHTML = '';
+  addMessage('bot', cfg.greeting);
+
+  // render sample questions
+  renderSamples(cfg.samples);
+}
+
+function renderSamples(samples) {
+  const container = document.getElementById('sampleQuestions');
+  container.innerHTML = '';
+  samples.forEach(q => {
+    const btn = document.createElement('button');
+    btn.className = 'sample-btn';
+    btn.textContent = q;
+    btn.onclick = () => {
+      document.getElementById('chatInput').value = q;
+      sendMessage();
+    };
+    container.appendChild(btn);
+  });
+}
+
+function clearChat() {
+  conversationHistory = [];
+  const box = document.getElementById('chatMessages');
+  box.innerHTML = '';
+  addMessage('bot', INDUSTRIES[currentIndustry].greeting);
+}
+
+// ─── MESSAGES ──────────────────────────────────────────
+function addMessage(role, text) {
+  const box = document.getElementById('chatMessages');
+  const div = document.createElement('div');
+  div.className = `msg ${role}`;
+
+  const avatar = document.createElement('div');
+  avatar.className = 'msg-avatar';
+  avatar.textContent = role === 'user' ? '👤' : '🤖';
+
+  const body = document.createElement('div');
+  body.className = 'msg-body';
+
+  const name = document.createElement('div');
+  name.className = 'msg-name';
+  name.textContent = role === 'user' ? 'あなた' : 'FAQ エージェント';
+
+  const textDiv = document.createElement('div');
+  textDiv.className = 'msg-text';
+  textDiv.textContent = text;
+
+  body.appendChild(name);
+  body.appendChild(textDiv);
+  div.appendChild(avatar);
+  div.appendChild(body);
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+  return textDiv;
+}
+
+function addThinking() {
+  const box = document.getElementById('chatMessages');
+  const div = document.createElement('div');
+  div.className = 'msg bot msg-thinking';
+  div.id = 'thinkingMsg';
+
+  const avatar = document.createElement('div');
+  avatar.className = 'msg-avatar';
+  avatar.textContent = '🤖';
+
+  const body = document.createElement('div');
+  body.className = 'msg-body';
+
+  const name = document.createElement('div');
+  name.className = 'msg-name';
+  name.textContent = 'FAQ エージェント';
+
+  const textDiv = document.createElement('div');
+  textDiv.className = 'msg-text';
+  textDiv.innerHTML = '検索中 <span class="dot-pulse">●●●</span>';
+
+  body.appendChild(name);
+  body.appendChild(textDiv);
+  div.appendChild(avatar);
+  div.appendChild(body);
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+}
+
+function removeThinking() {
+  const el = document.getElementById('thinkingMsg');
+  if (el) el.remove();
+}
+
+// ─── SEND ──────────────────────────────────────────────
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+}
+
+async function sendMessage() {
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if (!text) return;
+
+  const sendBtn = document.getElementById('sendBtn');
+  sendBtn.disabled = true;
+  input.value = '';
+
+  // Add user message
+  addMessage('user', text);
+  conversationHistory.push({ role: 'user', content: text });
+
+  // Show thinking
+  addThinking();
+  const t0 = Date.now();
+
+  try {
+    const cfg = INDUSTRIES[currentIndustry];
+
+    const response = await fetch('/api/faq', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        system: cfg.system,
+        messages: conversationHistory,
+      }),
+    });
+
+    const data = await response.json();
+    const reply = data.content?.[0]?.text || data.error || 'エラーが発生しました';
+
+    removeThinking();
+    addMessage('bot', reply);
+    conversationHistory.push({ role: 'assistant', content: reply });
+
+    const elapsed = Date.now() - t0;
+    responseTimes.push(elapsed);
+    const avg = Math.round(responseTimes.reduce((a,b)=>a+b,0)/responseTimes.length);
+    document.getElementById('avgResponseTime').textContent = avg + 'ms';
+
+  } catch (err) {
+    removeThinking();
+    addMessage('bot', 'エラーが発生しました。しばらくしてから再試行してください。');
+  }
+
+  sendBtn.disabled = false;
+  input.focus();
+}
+
+init();
+</script>
+</body>
+</html>
