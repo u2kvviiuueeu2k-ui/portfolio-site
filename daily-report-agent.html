@@ -986,7 +986,7 @@ ${JSON.stringify(shippingData, null, 2)}
 全体で350文字以内。敬語・丁寧語で。`;
 
   try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+    const response = await fetch('/api/report', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
