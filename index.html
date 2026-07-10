@@ -844,6 +844,34 @@
     border-color: rgba(0,229,176,0.15);
   }
 
+  .demo-preview {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+    border-radius: 0;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+  }
+
+  .demo-preview iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 400%;
+    height: 400%;
+    transform: scale(0.25);
+    transform-origin: top left;
+    border: 0;
+    pointer-events: none;
+  }
+
+  .demo-preview-link {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+  }
+
   .work-card-header {
     display: flex;
     align-items: center;
@@ -1255,6 +1283,10 @@
     <div class="works-grid">
       <!-- Demo #01 -->
       <div class="work-card">
+        <div class="demo-preview">
+          <iframe src="https://demo-reform.vercel.app/" loading="lazy" scrolling="no" tabindex="-1" aria-hidden="true" title="リフォーム会社デモのプレビュー"></iframe>
+          <a class="demo-preview-link" href="https://demo-reform.vercel.app/" target="_blank" rel="noopener" aria-label="リフォーム会社デモを開く"></a>
+        </div>
         <div class="work-card-header">
           <span class="work-num">01</span>
           <span class="work-industry">リフォーム会社</span>
@@ -1271,6 +1303,10 @@
 
       <!-- Demo #02 -->
       <div class="work-card">
+        <div class="demo-preview">
+          <iframe src="https://lumiere-salon.vercel.app/" loading="lazy" scrolling="no" tabindex="-1" aria-hidden="true" title="美容サロンデモのプレビュー"></iframe>
+          <a class="demo-preview-link" href="https://lumiere-salon.vercel.app/" target="_blank" rel="noopener" aria-label="美容サロンデモを開く"></a>
+        </div>
         <div class="work-card-header">
           <span class="work-num">02</span>
           <span class="work-industry">美容サロン</span>
@@ -1287,6 +1323,10 @@
 
       <!-- Demo #03 -->
       <div class="work-card">
+        <div class="demo-preview">
+          <iframe src="https://mirai-tax.vercel.app/" loading="lazy" scrolling="no" tabindex="-1" aria-hidden="true" title="税理士事務所デモのプレビュー"></iframe>
+          <a class="demo-preview-link" href="https://mirai-tax.vercel.app/" target="_blank" rel="noopener" aria-label="税理士事務所デモを開く"></a>
+        </div>
         <div class="work-card-header">
           <span class="work-num">03</span>
           <span class="work-industry">税理士事務所</span>
@@ -1303,6 +1343,10 @@
 
       <!-- Demo #04 -->
       <div class="work-card">
+        <div class="demo-preview">
+          <iframe src="https://yawara-seikotsu.vercel.app/" loading="lazy" scrolling="no" tabindex="-1" aria-hidden="true" title="整骨院デモのプレビュー"></iframe>
+          <a class="demo-preview-link" href="https://yawara-seikotsu.vercel.app/" target="_blank" rel="noopener" aria-label="整骨院デモを開く"></a>
+        </div>
         <div class="work-card-header">
           <span class="work-num">04</span>
           <span class="work-industry">整骨院</span>
@@ -1319,6 +1363,10 @@
 
       <!-- Demo #05 -->
       <div class="work-card">
+        <div class="demo-preview">
+          <iframe src="https://maison-koti.vercel.app/" loading="lazy" scrolling="no" tabindex="-1" aria-hidden="true" title="カフェデモのプレビュー"></iframe>
+          <a class="demo-preview-link" href="https://maison-koti.vercel.app/" target="_blank" rel="noopener" aria-label="カフェデモを開く"></a>
+        </div>
         <div class="work-card-header">
           <span class="work-num">05</span>
           <span class="work-industry">カフェ</span>
