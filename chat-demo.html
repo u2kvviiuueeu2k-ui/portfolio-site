@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>炭火とだし 灯（あかり）| AI接客チャットボット デモ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Zen+Maru+Gothic:wght@400;500;700&family=Noto+Sans+JP:wght@300;400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --r-cream: #faf3e6;
+    --r-cream2: #f2e6d2;
+    --r-brown: #3e2b22;
+    --r-brown2: #6b4a35;
+    --r-red: #a6392f;
+    --r-red2: #c14a3d;
+    --r-gold: #b8935a;
+    --w-bg: #0c0c0c;
+    --w-bg2: #161412;
+    --w-gold: #d4af37;
+    --w-gold2: #f0cf6b;
+    --w-text: #f0ece0;
+    --w-text2: #a39a8a;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { overflow-x: hidden; scroll-behavior: smooth; }
+  body {
+    overflow-x: hidden;
+    font-family: 'Noto Sans JP', sans-serif;
+    color: var(--r-brown);
+    background: var(--r-cream);
+    line-height: 1.8;
+  }
+
+  img, svg { max-width: 100%; }
+
+  /* =========================================================
+     RESTAURANT HOST SITE（架空の飲食店サイト）
+     ========================================================= */
+  .r-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 32px;
+    background: rgba(250,243,230,0.92);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid rgba(62,43,34,0.12);
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+
+  .r-logo {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--r-brown);
+    letter-spacing: 0.05em;
+  }
+
+  .r-nav-links {
+    display: flex;
+    gap: 24px;
+    list-style: none;
+  }
+
+  .r-nav-links a {
+    color: var(--r-brown2);
+    text-decoration: none;
+    font-size: 13px;
+    letter-spacing: 0.05em;
+    transition: color 0.2s;
+  }
+
+  .r-nav-links a:hover { color: var(--r-red); }
+
+  .r-hero {
+    position: relative;
+    padding: 100px 32px 90px;
+    text-align: center;
+    background:
+      radial-gradient(circle at 20% 20%, rgba(166,57,47,0.10) 0%, transparent 45%),
+      radial-gradient(circle at 80% 70%, rgba(184,147,90,0.14) 0%, transparent 50%),
+      var(--r-cream);
+    overflow: hidden;
+  }
+
+  .r-hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      repeating-linear-gradient(45deg, rgba(62,43,34,0.025) 0 2px, transparent 2px 40px);
+    pointer-events: none;
+  }
+
+  .r-hero-badge {
+    position: relative;
+    display: inline-block;
+    font-size: 12px;
+    letter-spacing: 0.2em;
+    color: var(--r-red);
+    border: 1px solid rgba(166,57,47,0.35);
+    padding: 6px 16px;
+    border-radius: 20px;
+    margin-bottom: 24px;
+  }
+
+  .r-hero h1 {
+    position: relative;
+    font-family: 'Shippori Mincho', serif;
+    font-size: clamp(34px, 6vw, 58px);
+    font-weight: 700;
+    color: var(--r-brown);
+    margin-bottom: 16px;
+    letter-spacing: 0.04em;
+  }
+
+  .r-hero p.tagline {
+    position: relative;
+    font-size: 15px;
+    color: var(--r-brown2);
+    max-width: 480px;
+    margin: 0 auto 32px;
+  }
+
+  .r-hero-meta {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    gap: 28px;
+    flex-wrap: wrap;
+    font-size: 13px;
+    color: var(--r-brown2);
+  }
+
+  .r-hero-meta span { white-space: nowrap; }
+  .r-hero-meta strong { color: var(--r-red); font-weight: 700; }
+
+  .r-section {
+    padding: 72px 32px;
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+
+  .r-section-label {
+    text-align: center;
+    font-size: 12px;
+    letter-spacing: 0.2em;
+    color: var(--r-gold);
+    margin-bottom: 8px;
+  }
+
+  .r-section-title {
+    text-align: center;
+    font-family: 'Shippori Mincho', serif;
+    font-size: clamp(24px, 3.4vw, 32px);
+    font-weight: 700;
+    color: var(--r-brown);
+    margin-bottom: 44px;
+  }
+
+  .r-menu-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+  }
+
+  .r-menu-card {
+    background: #fff;
+    border: 1px solid rgba(62,43,34,0.1);
+    border-radius: 14px;
+    padding: 26px 22px;
+    text-align: center;
+    box-shadow: 0 6px 18px rgba(62,43,34,0.06);
+    transition: transform 0.25s, box-shadow 0.25s;
+  }
+
+  .r-menu-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 24px rgba(62,43,34,0.12);
+  }
+
+  .r-menu-icon { font-size: 36px; margin-bottom: 14px; }
+
+  .r-menu-name {
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--r-brown);
+    margin-bottom: 8px;
+    line-height: 1.5;
+  }
+
+  .r-menu-price {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 15px;
+    color: var(--r-red);
+    font-weight: 500;
+  }
+
+  .r-info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+
+  .r-info-card {
+    background: var(--r-cream2);
+    border-radius: 14px;
+    padding: 30px 28px;
+  }
+
+  .r-info-card h3 {
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-size: 16px;
+    color: var(--r-red);
+    margin-bottom: 14px;
+  }
+
+  .r-info-card p {
+    font-size: 13.5px;
+    color: var(--r-brown2);
+    margin-bottom: 6px;
+  }
+
+  .r-footer {
+    text-align: center;
+    padding: 40px 32px;
+    background: var(--r-brown);
+    color: rgba(250,243,230,0.7);
+    font-size: 12px;
+  }
+
+  .r-footer strong {
+    display: block;
+    font-family: 'Shippori Mincho', serif;
+    font-size: 16px;
+    color: var(--r-cream);
+    margin-bottom: 8px;
+  }
+
+  @media (max-width: 720px) {
+    .r-nav-links { display: none; }
+    .r-hero { padding: 76px 20px 60px; }
+    .r-section { padding: 56px 20px; }
+    .r-info-grid { grid-template-columns: 1fr; }
+  }
+
+  /* =========================================================
+     AI CHAT WIDGET（黒金）
+     ========================================================= */
+  #chatToggleBtn {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    width: 62px;
+    height: 62px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--w-gold), #8a6a26);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.35), 0 0 0 0 rgba(212,175,55,0.5);
+    z-index: 1000;
+    animation: chatPulse 2.6s infinite;
+    transition: transform 0.2s;
+  }
+
+  #chatToggleBtn:hover { transform: scale(1.06); }
+
+  @keyframes chatPulse {
+    0% { box-shadow: 0 8px 24px rgba(0,0,0,0.35), 0 0 0 0 rgba(212,175,55,0.45); }
+    70% { box-shadow: 0 8px 24px rgba(0,0,0,0.35), 0 0 0 14px rgba(212,175,55,0); }
+    100% { box-shadow: 0 8px 24px rgba(0,0,0,0.35), 0 0 0 0 rgba(212,175,55,0); }
+  }
+
+  .chat-hint {
+    position: fixed;
+    right: 90px;
+    bottom: 34px;
+    background: var(--w-bg2);
+    color: var(--w-text);
+    font-size: 12.5px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1px solid rgba(212,175,55,0.3);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.3);
+    z-index: 999;
+    max-width: 190px;
+    animation: hintFade 0.4s ease-out 1.2s both;
+  }
+
+  @keyframes hintFade {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  #chatPanel {
+    position: fixed;
+    right: 20px;
+    bottom: 96px;
+    width: 360px;
+    max-width: calc(100vw - 24px);
+    height: min(70vh, 520px);
+    background: var(--w-bg);
+    border: 1px solid rgba(212,175,55,0.25);
+    border-radius: 16px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.45);
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+    z-index: 1000;
+    font-family: 'Noto Sans JP', sans-serif;
+  }
+
+  #chatPanel.open { display: flex; }
+
+  .chat-header {
+    background: var(--w-bg2);
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid rgba(212,175,55,0.2);
+  }
+
+  .chat-avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--w-gold), #8a6a26);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+
+  .chat-header-text { flex: 1; min-width: 0; }
+
+  .chat-header-title {
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--w-text);
+  }
+
+  .chat-header-sub {
+    font-size: 11px;
+    color: var(--w-gold2);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .chat-header-sub::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #3ddc84;
+    display: inline-block;
+  }
+
+  #chatCloseBtn {
+    background: none;
+    border: none;
+    color: var(--w-text2);
+    font-size: 20px;
+    cursor: pointer;
+    line-height: 1;
+    padding: 4px 6px;
+  }
+
+  #chatCloseBtn:hover { color: var(--w-gold2); }
+
+  #chatMessages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .chat-msg {
+    max-width: 82%;
+    padding: 10px 13px;
+    border-radius: 14px;
+    font-size: 13.5px;
+    line-height: 1.65;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .chat-msg.bot {
+    align-self: flex-start;
+    background: var(--w-bg2);
+    color: var(--w-text);
+    border: 1px solid rgba(212,175,55,0.15);
+    border-bottom-left-radius: 4px;
+  }
+
+  .chat-msg.user {
+    align-self: flex-end;
+    background: linear-gradient(135deg, var(--w-gold), #9a7830);
+    color: #16130a;
+    font-weight: 500;
+    border-bottom-right-radius: 4px;
+  }
+
+  .chat-typing {
+    align-self: flex-start;
+    display: flex;
+    gap: 4px;
+    padding: 12px 14px;
+    background: var(--w-bg2);
+    border-radius: 14px;
+    border-bottom-left-radius: 4px;
+  }
+
+  .chat-typing span {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--w-gold2);
+    animation: typingBounce 1.1s infinite ease-in-out;
+  }
+
+  .chat-typing span:nth-child(2) { animation-delay: 0.15s; }
+  .chat-typing span:nth-child(3) { animation-delay: 0.3s; }
+
+  @keyframes typingBounce {
+    0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
+    30% { transform: translateY(-5px); opacity: 1; }
+  }
+
+  .chat-quick-replies {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 0 16px 10px;
+  }
+
+  .chat-chip {
+    background: var(--w-bg2);
+    border: 1px solid rgba(212,175,55,0.3);
+    color: var(--w-gold2);
+    font-size: 12px;
+    padding: 7px 12px;
+    border-radius: 999px;
+    cursor: pointer;
+    white-space: nowrap;
+    font-family: 'Noto Sans JP', sans-serif;
+    transition: background 0.2s, transform 0.15s;
+  }
+
+  .chat-chip:hover { background: rgba(212,175,55,0.15); transform: translateY(-1px); }
+
+  .chat-quick-note {
+    font-size: 10.5px;
+    color: var(--w-text2);
+    padding: 0 16px 10px;
+    opacity: 0.7;
+  }
+
+  .chat-input-row {
+    display: flex;
+    gap: 8px;
+    padding: 12px;
+    border-top: 1px solid rgba(212,175,55,0.15);
+    background: var(--w-bg2);
+  }
+
+  #chatInput {
+    flex: 1;
+    background: var(--w-bg);
+    border: 1px solid rgba(212,175,55,0.25);
+    border-radius: 10px;
+    color: var(--w-text);
+    padding: 10px 12px;
+    font-size: 13.5px;
+    font-family: inherit;
+    resize: none;
+    outline: none;
+    max-height: 80px;
+  }
+
+  #chatInput:focus { border-color: var(--w-gold); }
+  #chatInput::placeholder { color: var(--w-text2); }
+  #chatInput:disabled { opacity: 0.55; cursor: not-allowed; }
+
+  #chatSendBtn {
+    background: linear-gradient(135deg, var(--w-gold), #9a7830);
+    border: none;
+    border-radius: 10px;
+    width: 42px;
+    color: #16130a;
+    font-size: 16px;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: transform 0.15s;
+  }
+
+  #chatSendBtn:hover:not(:disabled) { transform: scale(1.05); }
+  #chatSendBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  @media (max-width: 480px) {
+    #chatPanel {
+      right: 12px;
+      left: 12px;
+      width: auto;
+      max-width: none;
+      bottom: 88px;
+      height: min(64vh, 480px);
+    }
+    #chatToggleBtn { right: 16px; bottom: 16px; width: 56px; height: 56px; font-size: 22px; }
+    .chat-hint { display: none; }
+  }
+
+  /* =========================================================
+     SALES SECTION（Alnair 黒金）
+     ========================================================= */
+  .sales-section {
+    background: var(--w-bg);
+    color: var(--w-text);
+    padding: 90px 32px;
+  }
+
+  .sales-inner {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .sales-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.2em;
+    color: var(--w-gold2);
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+
+  .sales-title {
+    font-size: clamp(26px, 4vw, 42px);
+    font-weight: 700;
+    line-height: 1.4;
+    margin-bottom: 20px;
+  }
+
+  .sales-title span { color: var(--w-gold2); }
+
+  .sales-desc {
+    color: var(--w-text2);
+    font-size: 14.5px;
+    max-width: 560px;
+    margin-bottom: 40px;
+    line-height: 1.9;
+  }
+
+  .sales-points {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+    margin-bottom: 48px;
+  }
+
+  .sales-point {
+    background: var(--w-bg2);
+    border: 1px solid rgba(212,175,55,0.15);
+    border-radius: 12px;
+    padding: 22px 20px;
+  }
+
+  .sales-point-icon { font-size: 22px; margin-bottom: 10px; }
+
+  .sales-point h4 {
+    font-size: 14px;
+    margin-bottom: 8px;
+    color: var(--w-text);
+  }
+
+  .sales-point p {
+    font-size: 12.5px;
+    color: var(--w-text2);
+    line-height: 1.7;
+  }
+
+  .code-panel {
+    background: #08080a;
+    border: 1px solid rgba(212,175,55,0.2);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 48px;
+  }
+
+  .code-panel-header {
+    background: var(--w-bg2);
+    padding: 10px 16px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--w-text2);
+    border-bottom: 1px solid rgba(212,175,55,0.15);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .code-dot {
+    width: 9px; height: 9px; border-radius: 50%;
+  }
+  .code-dot.r { background: #ff5f57; }
+  .code-dot.y { background: #ffbd2e; }
+  .code-dot.g { background: #28ca41; }
+
+  .code-panel pre {
+    padding: 18px 20px;
+    overflow-x: auto;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12.5px;
+    line-height: 1.9;
+    color: #d8d2c0;
+  }
+
+  .code-tag { color: #7fd0a8; }
+  .code-attr { color: var(--w-gold2); }
+  .code-str { color: #e79a63; }
+
+  .sales-cta {
+    text-align: center;
+  }
+
+  .sales-cta a {
+    display: inline-block;
+    background: linear-gradient(135deg, var(--w-gold2), var(--w-gold));
+    color: #16130a;
+    font-weight: 700;
+    font-size: 15px;
+    padding: 16px 40px;
+    border-radius: 999px;
+    text-decoration: none;
+    box-shadow: 0 10px 30px rgba(212,175,55,0.25);
+    transition: transform 0.2s;
+  }
+
+  .sales-cta a:hover { transform: translateY(-2px); }
+
+  .sales-cta p {
+    margin-top: 16px;
+    font-size: 12px;
+    color: var(--w-text2);
+  }
+
+  @media (max-width: 720px) {
+    .sales-section { padding: 60px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ RESTAURANT HOST SITE ============ -->
+<nav class="r-nav">
+  <div class="r-logo">灯 -あかり-</div>
+  <ul class="r-nav-links">
+    <li><a href="#menu">メニュー</a></li>
+    <li><a href="#info">営業時間・アクセス</a></li>
+    <li><a href="#reserve">ご予約</a></li>
+  </ul>
+</nav>
+
+<section class="r-hero">
+  <div class="r-hero-badge">炭火焼き × 手仕込みの一杯</div>
+  <h1>炭火とだし　灯（あかり）</h1>
+  <p class="tagline">
+    三代続く炭火焼きと、丁寧にひいた出汁の一杯を。<br>
+    仕事帰りにふらりと、大切な人とゆっくりと。
+  </p>
+  <div class="r-hero-meta">
+    <span>営業時間　<strong>17:00〜24:00</strong></span>
+    <span>定休日　<strong>毎週月曜日</strong></span>
+    <span>◯◯駅東口より<strong>徒歩3分</strong></span>
+  </div>
+</section>
+
+<section class="r-section" id="menu">
+  <div class="r-section-label">// SIGNATURE MENU</div>
+  <h2 class="r-section-title">看板メニュー</h2>
+  <div class="r-menu-grid">
+    <div class="r-menu-card">
+      <div class="r-menu-icon">🔥</div>
+      <div class="r-menu-name">炭火焼き 特選国産和牛カルビ</div>
+      <div class="r-menu-price">¥2,480</div>
+    </div>
+    <div class="r-menu-card">
+      <div class="r-menu-icon">🍳</div>
+      <div class="r-menu-name">名物 出汁巻き玉子</div>
+      <div class="r-menu-price">¥680</div>
+    </div>
+    <div class="r-menu-card">
+      <div class="r-menu-icon">🐟</div>
+      <div class="r-menu-name">本日の鮮魚盛り合わせ</div>
+      <div class="r-menu-price">¥1,980</div>
+    </div>
+    <div class="r-menu-card">
+      <div class="r-menu-icon">🍚</div>
+      <div class="r-menu-name">灯オリジナル 黒毛和牛の追い出汁茶漬け</div>
+      <div class="r-menu-price">¥980</div>
+    </div>
+  </div>
+</section>
+
+<section class="r-section" id="info">
+  <div class="r-section-label">// INFORMATION</div>
+  <h2 class="r-section-title">営業時間・アクセス・ご予約</h2>
+  <div class="r-info-grid">
+    <div class="r-info-card">
+      <h3>営業時間・定休日</h3>
+      <p>営業時間：17:00〜24:00（フードL.O. 23:00 / ドリンクL.O. 23:30）</p>
+      <p>定休日：毎週月曜日（祝日の場合は翌火曜）</p>
+      <p>座席：カウンター8席・テーブル20席・個室あり（4〜8名）</p>
+    </div>
+    <div class="r-info-card" id="reserve">
+      <h3>アクセス・ご予約</h3>
+      <p>所在地：東京都◯◯区◯◯1-2-3</p>
+      <p>◯◯駅 東口より徒歩3分</p>
+      <p>ご予約：お電話・当日予約可（03-1234-5678）</p>
+      <p>10名以上の団体様は事前にご相談ください</p>
+      <p>専用駐車場はございません。近隣コインパーキングをご案内しております</p>
+    </div>
+  </div>
+</section>
+
+<footer class="r-footer">
+  <strong>炭火とだし　灯（あかり）</strong>
+  東京都◯◯区◯◯1-2-3　TEL 03-1234-5678　※本サイトはAI接客チャットボットのデモ用に作成した架空の店舗です
+</footer>
+
+<!-- ============ AI CHAT WIDGET ============ -->
+<div class="chat-hint" id="chatHint">ご質問はチャットでどうぞ 💬</div>
+<button id="chatToggleBtn" aria-label="チャットを開く">💬</button>
+
+<div id="chatPanel">
+  <div class="chat-header">
+    <div class="chat-avatar">🏮</div>
+    <div class="chat-header-text">
+      <div class="chat-header-title">灯（あかり） AIスタッフ</div>
+      <div class="chat-header-sub">オンライン対応中</div>
+    </div>
+    <button id="chatCloseBtn" aria-label="閉じる">×</button>
+  </div>
+  <div id="chatMessages"></div>
+  <div class="chat-quick-replies" id="chatQuickReplies">
+    <button type="button" class="chat-chip" data-quick="reserve">📅 予約について</button>
+    <button type="button" class="chat-chip" data-quick="access">📍 アクセス・駐車場</button>
+    <button type="button" class="chat-chip" data-quick="menu">🍽 おすすめメニュー</button>
+    <button type="button" class="chat-chip" data-quick="hours">🕐 営業時間・定休日</button>
+    <button type="button" class="chat-chip" data-quick="allergy">🥚 アレルギー・苦手な食材</button>
+  </div>
+  <div class="chat-quick-note">※ これは公開デモです。実際の導入では、お客様が自由に文章を入力できる本物のAIチャットになります。ここでは代表的なご質問からお選びいただけます。</div>
+  <div class="chat-input-row">
+    <textarea id="chatInput" rows="1" placeholder="本番導入では自由に入力できます（このデモは選択式です）" disabled></textarea>
+    <button id="chatSendBtn" aria-label="送信" disabled>➤</button>
+  </div>
+</div>
+
+<!-- ============ SALES SECTION ============ -->
+<section class="sales-section">
+  <div class="sales-inner">
+    <div class="sales-label">// AI接客チャットボット</div>
+    <h2 class="sales-title">このAI接客を、<br><span>あなたのサイト・LINEに。</span></h2>
+    <p class="sales-desc">
+      上のチャットは、AI接客チャットの操作イメージ（デモ版）です。
+      実際の導入では、店舗情報・メニュー・営業時間を1回登録するだけで、24時間365日、
+      来店前のよくある質問（予約・アクセス・おすすめ・アレルギー対応など）に、
+      お客様が自由に入力した文章にもAIが即座に回答します。取りこぼしていた問い合わせを、機会損失ゼロに変えます。
+    </p>
+    <div class="sales-points">
+      <div class="sales-point">
+        <div class="sales-point-icon">🕐</div>
+        <h4>24時間365日 対応</h4>
+        <p>営業時間外の問い合わせも取りこぼさない。深夜の「今日空いてる？」にも即答します。</p>
+      </div>
+      <div class="sales-point">
+        <div class="sales-point-icon">⚙️</div>
+        <h4>導入は驚くほど簡単</h4>
+        <p>店舗情報を登録するだけ。既存サイト・LINE公式アカウントにそのまま設置できます。</p>
+      </div>
+      <div class="sales-point">
+        <div class="sales-point-icon">📋</div>
+        <h4>会話ログで需要を把握</h4>
+        <p>「何を聞かれているか」が分かる。よくある質問はメニューやサイトの改善にも活用できます。</p>
+      </div>
+    </div>
+
+    <div class="code-panel">
+      <div class="code-panel-header">
+        <span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span>
+        <span>embed-example.html</span>
+      </div>
+      <pre><span class="code-tag">&lt;script</span> <span class="code-attr">src</span>=<span class="code-str">"https://cdn.alnair.jp/chat-widget.js"</span>
+        <span class="code-attr">data-store-name</span>=<span class="code-str">"貴社の店舗名"</span>
+        <span class="code-attr">data-menu</span>=<span class="code-str">"看板メニュー1, 看板メニュー2..."</span>
+        <span class="code-attr">data-hours</span>=<span class="code-str">"営業時間・定休日"</span>
+        <span class="code-attr">data-access</span>=<span class="code-str">"アクセス・駐車場情報"</span><span class="code-tag">&gt;&lt;/script&gt;</span></pre>
+    </div>
+
+    <div class="sales-cta">
+      <a href="https://alnair-hp.vercel.app/" target="_blank" rel="noopener">導入について相談する →</a>
+      <p>※このデモページと同じAIチャットを、貴社サイトに設置できます</p>
+    </div>
+  </div>
+</section>
+
+<script>
+(function () {
+  const toggleBtn = document.getElementById('chatToggleBtn');
+  const closeBtn = document.getElementById('chatCloseBtn');
+  const panel = document.getElementById('chatPanel');
+  const messagesEl = document.getElementById('chatMessages');
+  const input = document.getElementById('chatInput');
+  const hint = document.getElementById('chatHint');
+
+  function appendMessage(role, text) {
+    const div = document.createElement('div');
+    div.className = 'chat-msg ' + (role === 'user' ? 'user' : 'bot');
+    div.textContent = text;
+    messagesEl.appendChild(div);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+    return div;
+  }
+
+  // 初期メッセージ
+  appendMessage('bot', 'いらっしゃいませ、灯（あかり）のAIスタッフです。ご予約・メニュー・営業時間など、なんでもご質問どうぞ。');
+
+  // ---- クイック返信チップ（定型回答・APIを叩かない） ----
+  const QUICK_REPLIES = {
+    reserve: {
+      question: 'ご予約はできますか？',
+      answer: 'はい、当日予約も承っております。お電話（03-1234-5678）にてご連絡くださいませ。10名以上の団体様は事前にご相談いただけますと幸いです。'
+    },
+    access: {
+      question: 'アクセスと駐車場を教えてください。',
+      answer: '所在地は東京都◯◯区◯◯1-2-3、◯◯駅東口より徒歩3分でございます。専用駐車場はございませんので、近隣のコインパーキングをご利用くださいませ。'
+    },
+    menu: {
+      question: 'おすすめのメニューはありますか？',
+      answer: '当店イチオシは炭火焼き 特選国産和牛カルビ（¥2,480）と、名物 出汁巻き玉子（¥680）でございます。ぜひご賞味ください。'
+    },
+    hours: {
+      question: '営業時間と定休日を教えてください。',
+      answer: '営業時間は17:00〜24:00（フードL.O. 23:00 / ドリンクL.O. 23:30）でございます。定休日は毎週月曜日（祝日の場合は翌火曜）となっております。'
+    },
+    allergy: {
+      question: 'アレルギーや苦手な食材があるのですが相談できますか？',
+      answer: '卵・小麦・そばなど主要なアレルギー品目については、事前にご相談いただければ対応可能でございます。ご予約やご来店の際にお申し付けくださいませ。'
+    }
+  };
+
+  document.querySelectorAll('.chat-chip').forEach((chip) => {
+    chip.addEventListener('click', () => {
+      const qa = QUICK_REPLIES[chip.dataset.quick];
+      if (!qa) return;
+      appendMessage('user', qa.question);
+      appendMessage('bot', qa.answer);
+    });
+  });
+
+  function openChat() {
+    panel.classList.add('open');
+    hint.style.display = 'none';
+    input.focus();
+  }
+
+  function closeChat() {
+    panel.classList.remove('open');
+  }
+
+  toggleBtn.addEventListener('click', () => {
+    if (panel.classList.contains('open')) {
+      closeChat();
+    } else {
+      openChat();
+    }
+  });
+  closeBtn.addEventListener('click', closeChat);
+  hint.addEventListener('click', openChat);
+})();
+</script>
+</body>
+</html>

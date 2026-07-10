@@ -676,10 +676,11 @@
         <div class="config-item">
           <span class="config-label">蔵元</span>
           <select id="brewery-select">
-            <option value="matsui">松井酒造合名会社</option>
+            <option value="seisou">星霜酒造合名会社</option>
             <option value="demo">デモ蔵元</option>
           </select>
         </div>
+        <span style="font-size: 11px; color: var(--text3);">※ 星霜酒造は架空のデモ企業です</span>
       </div>
 
       <div class="data-card">
@@ -893,7 +894,7 @@
       <span class="str">'content-type'</span>:      <span class="str">'application/json'</span>
     },
     payload: JSON.<span class="fn">stringify</span>({
-      model:      <span class="str">'claude-sonnet-4-20250514'</span>,
+      model:      <span class="str">'claude-sonnet-4-5'</span>,
       max_tokens: <span class="var">1000</span>,
       messages:   [{ role: <span class="str">'user'</span>, content: <span class="var">prompt</span> }]
     })
@@ -945,7 +946,7 @@ async function generateReport() {
   sentMsg.classList.remove('visible');
 
   const date = document.getElementById('report-date').value;
-  const brewery = document.getElementById('brewery-select').value === 'matsui' ? '松井酒造合名会社' : 'デモ蔵元';
+  const brewery = document.getElementById('brewery-select').value === 'seisou' ? '星霜酒造合名会社' : 'デモ蔵元';
 
   const tankData = [
     { タンクID: 'T-01', 銘柄: '純米吟醸 山田錦', 経過日数: 18, 品温: 12.4, アルコール度: 14.2, 日本酒度: '+3.0', 状態: '正常' },
@@ -990,8 +991,6 @@ ${JSON.stringify(shippingData, null, 2)}
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
         messages: [{ role: 'user', content: prompt }]
       })
     });
@@ -1016,7 +1015,7 @@ ${JSON.stringify(shippingData, null, 2)}
       }, 12);
 
     } else {
-      throw new Error(data.error?.message || 'APIエラーが発生しました');
+      throw new Error(data.error || 'APIエラーが発生しました');
     }
   } catch (err) {
     loading.classList.remove('active');

@@ -1,4 +1,4 @@
-// api/report.js  ── 日次レポートエージェント用サーバーレス関数
+// api/chat.js  ── AI接客チャットボット用サーバーレス関数
 // faq.js と同パターン。CLAUDE_API_KEY は Vercel 環境変数から取得。
 
 export default async function handler(req, res) {
@@ -35,9 +35,9 @@ export default async function handler(req, res) {
         'anthropic-version': '2023-06-01',
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-5',
-        max_tokens: 1500,
-        system: system || 'あなたは業務日次レポート作成エージェントです。',
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 1024,
+        system: system || 'あなたは店舗の接客チャットエージェントです。',
         messages: messages,
       }),
     });

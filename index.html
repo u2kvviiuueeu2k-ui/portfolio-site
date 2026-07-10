@@ -913,6 +913,120 @@
     .works-section { padding: 60px 24px; }
     .works-grid { grid-template-columns: 1fr; }
   }
+
+  /* ===== SITE CHECK RESULT (SAMPLE) ===== */
+  .score-total {
+    font-family: var(--font-mono);
+    font-size: 16px;
+    color: var(--accent);
+    margin-bottom: 16px;
+  }
+
+  .score-row {
+    margin-bottom: 14px;
+  }
+
+  .score-row-head {
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text2);
+    margin-bottom: 4px;
+    letter-spacing: 0.05em;
+  }
+
+  .score-bar-track {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    height: 6px;
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .score-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+  }
+
+  .score-note {
+    font-size: 12px;
+    color: var(--text2);
+    margin-top: 5px;
+    line-height: 1.6;
+  }
+
+  .sample-warning {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: #ffbd2e;
+    border: 1px solid rgba(255,189,46,0.3);
+    background: rgba(255,189,46,0.06);
+    padding: 10px 12px;
+    margin-top: 16px;
+    letter-spacing: 0.03em;
+  }
+
+  .report-cta {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+    font-size: 13px;
+    color: var(--text2);
+    line-height: 1.8;
+  }
+
+  /* ===== CONTACT FORM ===== */
+  .contact-form {
+    max-width: 460px;
+    margin: 0 auto;
+    text-align: left;
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .form-row {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .form-label {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text2);
+    letter-spacing: 0.05em;
+  }
+
+  .form-label .req { color: var(--accent); }
+
+  .form-input {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 14px;
+    padding: 12px 14px;
+    outline: none;
+    transition: border 0.2s;
+    width: 100%;
+  }
+
+  .form-input:focus { border-color: var(--accent); }
+
+  .form-textarea { resize: vertical; font-family: var(--font-body); }
+
+  .form-status {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    min-height: 18px;
+  }
+
+  .form-status.success { color: var(--accent); }
+  .form-status.error { color: #ffbd2e; }
 </style>
 </head>
 <body>
@@ -952,7 +1066,7 @@
   <div class="hero-stats">
     <div class="stat-item">
       <div class="stat-num" data-final="1億+">—</div>
-      <div class="stat-label">事業年商</div>
+      <div class="stat-label">物販事業の年商</div>
     </div>
     <div class="stat-item">
       <div class="stat-num" data-final="24h以内">—</div>
@@ -960,7 +1074,7 @@
     </div>
     <div class="stat-item">
       <div class="stat-num" data-final="最短3日">—</div>
-      <div class="stat-label">納品スピード</div>
+      <div class="stat-label">対応スピード</div>
     </div>
   </div>
 </section>
@@ -1029,6 +1143,27 @@
   </div>
 </section>
 
+<!-- AI WEB SITE CHECK (LEAD GEN, SAMPLE ONLY) -->
+<section class="terminal-section" id="site-check">
+  <div class="section-label">// free ai website check</div>
+  <h2 class="section-title">AI Web集客診断（無料サンプル）</h2>
+  <p class="section-desc">サイトURLを入力すると、AIがデザイン・SEO・モバイル対応・集客導線・信頼性をその場でサンプル診断します。</p>
+
+  <div class="demo-panel" style="max-width:600px;">
+    <div class="demo-panel-header">
+      <div class="demo-panel-title">サイトURL診断</div>
+      <div class="badge-live">FREE</div>
+    </div>
+    <div class="demo-panel-body">
+      <div class="demo-input-row">
+        <input type="text" class="demo-select" id="siteUrlInput" placeholder="https://your-site.com">
+        <button class="demo-btn" id="siteCheckBtn" onclick="runSiteCheck()">無料で診断する</button>
+      </div>
+      <div class="demo-output" id="siteCheckOutput">← サイトURLを入力して「無料で診断する」を押してください。</div>
+    </div>
+  </div>
+</section>
+
 <!-- PORTFOLIO WORKS -->
 <section class="works-section" id="works">
   <div style="max-width: 1100px; margin: 0 auto; padding: 0 0 0 0;">
@@ -1080,6 +1215,120 @@
           <span class="tag">定期実行</span>
         </div>
         <a href="report-agent.html" target="_blank" class="work-link">
+          デモを見る →
+        </a>
+      </div>
+
+      <!-- Work #03 -->
+      <div class="work-card work-card-new">
+        <div class="work-card-header">
+          <span class="work-num">03</span>
+          <span class="work-industry">飲食・店舗</span>
+          <span class="work-badge-new">NEW</span>
+        </div>
+        <h3 class="work-title">AI接客チャットボット（デモ）</h3>
+        <p class="work-desc">
+          サイトに埋め込む24時間AI接客チャット。架空の居酒屋サイトを舞台に、
+          予約・アクセス・おすすめメニュー・アレルギー対応などの質問にAIがその場で応答。
+          店舗情報を登録するだけで、そのまま貴社サイトやLINEに導入できます。
+        </p>
+        <div class="work-tags">
+          <span class="tag">Claude API</span>
+          <span class="tag">埋め込みウィジェット</span>
+          <span class="tag">24時間接客</span>
+        </div>
+        <a href="chat-demo.html" target="_blank" class="work-link">
+          デモを見る →
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- INDUSTRY DEMO SITES -->
+<section class="works-section" id="industry-demos">
+  <div style="max-width: 1100px; margin: 0 auto; padding: 0 0 0 0;">
+    <div class="section-label">// industry demo sites</div>
+    <h2 class="section-title">業種別サイトデモ</h2>
+    <p class="section-desc">実際の受注案件ではなく、業種の雰囲気を掴んでもらうためのサンプルサイトです。これをベースに貴社仕様へ仕立て直せます。</p>
+
+    <div class="works-grid">
+      <!-- Demo #01 -->
+      <div class="work-card">
+        <div class="work-card-header">
+          <span class="work-num">01</span>
+          <span class="work-industry">リフォーム会社</span>
+          <span class="work-badge-new">DEMO</span>
+        </div>
+        <h3 class="work-title">REFORM CRAFT</h3>
+        <p class="work-desc">
+          施工実績と信頼感を前面に出し、問い合わせへの導線を明快に設計したリフォーム会社向けサンプルサイトです。
+        </p>
+        <a href="https://demo-reform.vercel.app/" target="_blank" rel="noopener" class="work-link">
+          デモを見る →
+        </a>
+      </div>
+
+      <!-- Demo #02 -->
+      <div class="work-card">
+        <div class="work-card-header">
+          <span class="work-num">02</span>
+          <span class="work-industry">美容サロン</span>
+          <span class="work-badge-new">DEMO</span>
+        </div>
+        <h3 class="work-title">Lumière</h3>
+        <p class="work-desc">
+          上質な世界観と予約のしやすさを両立させた、美容サロン向けサンプルサイトです。
+        </p>
+        <a href="https://lumiere-salon.vercel.app/" target="_blank" rel="noopener" class="work-link">
+          デモを見る →
+        </a>
+      </div>
+
+      <!-- Demo #03 -->
+      <div class="work-card">
+        <div class="work-card-header">
+          <span class="work-num">03</span>
+          <span class="work-industry">税理士事務所</span>
+          <span class="work-badge-new">DEMO</span>
+        </div>
+        <h3 class="work-title">みらい税理士事務所</h3>
+        <p class="work-desc">
+          専門性の高いサービス内容を、初めての方にもわかりやすい言葉に翻訳した士業向けサンプルサイトです。
+        </p>
+        <a href="https://mirai-tax.vercel.app/" target="_blank" rel="noopener" class="work-link">
+          デモを見る →
+        </a>
+      </div>
+
+      <!-- Demo #04 -->
+      <div class="work-card">
+        <div class="work-card-header">
+          <span class="work-num">04</span>
+          <span class="work-industry">整骨院</span>
+          <span class="work-badge-new">DEMO</span>
+        </div>
+        <h3 class="work-title">やわら整骨院</h3>
+        <p class="work-desc">
+          安心感のある雰囲気づくりと、症状別に施術内容がわかりやすく伝わる整骨院向けサンプルサイトです。
+        </p>
+        <a href="https://yawara-seikotsu.vercel.app/" target="_blank" rel="noopener" class="work-link">
+          デモを見る →
+        </a>
+      </div>
+
+      <!-- Demo #05 -->
+      <div class="work-card">
+        <div class="work-card-header">
+          <span class="work-num">05</span>
+          <span class="work-industry">カフェ</span>
+          <span class="work-badge-new">DEMO</span>
+        </div>
+        <h3 class="work-title">MAISON KOTI</h3>
+        <p class="work-desc">
+          居心地の良さとメニューの魅力を丁寧に伝える、カフェ向けサンプルサイトです。
+        </p>
+        <a href="https://maison-koti.vercel.app/" target="_blank" rel="noopener" class="work-link">
           デモを見る →
         </a>
       </div>
@@ -1249,7 +1498,31 @@
   <div class="cta-glow"></div>
   <h2>まず、相談してみてください。</h2>
   <p>「自動化できるかわからない」でも大丈夫です。ヒアリングから一緒に考えます。</p>
-  <a href="https://crowdworks.jp" class="btn-primary" target="_blank">クラウドワークスからメッセージする</a>
+
+  <form class="contact-form" id="contactForm" onsubmit="return submitContactForm(event)">
+    <input type="hidden" name="access_key" value="2960792f-620a-4440-bded-71d91724d2c5">
+    <input type="hidden" name="subject" value="【ポートフォリオ】お問い合わせ">
+    <div class="form-row">
+      <label class="form-label" for="contactName">お名前 <span class="req">*</span></label>
+      <input class="form-input" type="text" id="contactName" name="name" required>
+    </div>
+    <div class="form-row">
+      <label class="form-label" for="contactEmail">メールアドレス <span class="req">*</span></label>
+      <input class="form-input" type="email" id="contactEmail" name="email" required>
+    </div>
+    <div class="form-row">
+      <label class="form-label" for="contactSiteUrl">サイトURL（診断対象・任意）</label>
+      <input class="form-input" type="text" id="contactSiteUrl" name="site_url" placeholder="https://your-site.com">
+    </div>
+    <div class="form-row">
+      <label class="form-label" for="contactMessage">ご相談内容</label>
+      <textarea class="form-input form-textarea" id="contactMessage" name="message" rows="4"></textarea>
+    </div>
+    <button type="submit" class="btn-primary" id="contactSubmitBtn">送信する</button>
+    <div class="form-status" id="contactFormStatus"></div>
+  </form>
+
+  <p style="margin-top:24px; position:relative; z-index:1; font-size:13px;"><a href="https://crowdworks.jp" class="work-link" target="_blank">またはクラウドワークスからメッセージする →</a></p>
 </section>
 
 <!-- FOOTER -->
@@ -1309,14 +1582,60 @@ function typeNext() {
 
 setTimeout(typeNext, 2800);
 
-// Live AI Demo
-async function runDemo() {
+// Escape helper (avoid injecting raw user input into innerHTML)
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+function scrollToContact() {
+  const el = document.getElementById('contact');
+  if (el) el.scrollIntoView({ behavior: 'smooth' });
+}
+
+// Live AI Demo (sample template — no API call, no cost)
+const demoTemplates = {
+  '受注・発注の管理が手作業で大変': {
+    proposal: '受注・発注データをスプレッドシートに集約し、入力〜発注書作成〜通知までを自動化するフローを構築します。',
+    tech: 'Google Apps Script / Spreadsheet / Gmail API',
+    effect: '入力ミスの削減と、月間およそ10時間の作業時間削減が見込めます。',
+    level: '★★☆☆☆ — 2〜3日で実装可能'
+  },
+  '毎日同じレポートを手で作っている': {
+    proposal: 'スプレッドシートのデータを毎朝自動集計し、Slack・メールへレポートを自動配信する仕組みを構築します。',
+    tech: 'Google Apps Script / Slack API / 定期実行トリガー',
+    effect: '毎朝の集計・報告作業がゼロになり、担当者の時間を確保できます。',
+    level: '★★☆☆☆ — 2〜3日で実装可能'
+  },
+  '問い合わせ対応に時間がかかっている': {
+    proposal: 'よくある質問に自動応答するAIチャット・FAQエージェントを設置し、一次対応を自動化します。',
+    tech: 'AIチャットボット / 埋め込みウィジェット',
+    effect: '一次対応の時間を大幅に削減し、担当者は個別対応に集中できます。',
+    level: '★★★☆☆ — 3〜5日で実装可能'
+  },
+  '在庫管理がExcelで属人化している': {
+    proposal: 'Excel台帳をスプレッドシートDB化し、入出庫の記録・在庫アラート通知を自動化します。',
+    tech: 'Google Apps Script / Spreadsheet / データベース連携',
+    effect: '属人化の解消と、在庫切れ・過剰在庫のリスクを早期に発見できます。',
+    level: '★★★☆☆ — 3〜5日で実装可能'
+  },
+  '社内の情報共有が遅い': {
+    proposal: '各種申請・報告フォームの内容を自動要約し、関係者へ即座に通知する仕組みを構築します。',
+    tech: 'Google Forms / Slack連携 / 自動通知',
+    effect: '情報共有のタイムラグが解消し、意思決定のスピードが上がります。',
+    level: '★★☆☆☆ — 2〜3日で実装可能'
+  }
+};
+
+function runDemo() {
   const bizType = document.getElementById('bizType').value;
   const painType = document.getElementById('painType').value;
   const output = document.getElementById('demoOutput');
   const btn = document.getElementById('analyzeBtn');
 
   if (!bizType || !painType) {
+    output.className = 'demo-output';
     output.textContent = '⚠ 業種とお困りごとを両方選択してください。';
     return;
   }
@@ -1325,45 +1644,125 @@ async function runDemo() {
   output.className = 'demo-output loading';
   output.innerHTML = '<div class="spinner"></div> AIが分析中...';
 
+  setTimeout(() => {
+    const t = demoTemplates[painType];
+    output.className = 'demo-output';
+    output.innerHTML = `
+      <div style="color:var(--text)"><strong>【${escapeHtml(bizType)}】${escapeHtml(painType)}</strong></div>
+      <div style="margin-top:10px">【自動化の提案】<br>${t.proposal}</div>
+      <div style="margin-top:10px">【使用技術】<br>${t.tech}</div>
+      <div style="margin-top:10px">【期待効果】<br>${t.effect}</div>
+      <div style="margin-top:10px">【実装の難易度】<br>${t.level}</div>
+      <div class="report-cta">
+        ▶ 具体的な自動化プランとお見積もりは無料でご提案します。<br><br>
+        <button class="demo-btn" onclick="scrollToContact()">無料で相談する</button>
+      </div>
+    `;
+    btn.disabled = false;
+  }, 1400);
+}
+
+// AI Web Site Check (sample template — no API call, no cost)
+let lastCheckedUrl = '';
+
+function runSiteCheck() {
+  const input = document.getElementById('siteUrlInput');
+  const output = document.getElementById('siteCheckOutput');
+  const btn = document.getElementById('siteCheckBtn');
+  const url = input.value.trim();
+
+  if (!url) {
+    output.className = 'demo-output';
+    output.textContent = '⚠ サイトURLを入力してください。';
+    return;
+  }
+
+  btn.disabled = true;
+  output.className = 'demo-output loading';
+  output.innerHTML = '<div class="spinner"></div> 解析中...';
+
+  setTimeout(() => {
+    lastCheckedUrl = url;
+    output.className = 'demo-output';
+    output.innerHTML = `
+      <div class="score-total">総合スコア：72 / 100</div>
+
+      <div class="score-row">
+        <div class="score-row-head"><span>デザイン</span><span>78</span></div>
+        <div class="score-bar-track"><div class="score-bar-fill" style="width:78%"></div></div>
+        <div class="score-note">配色・レイアウトの基本は良好。ファーストビューの訴求をより明確にすると離脱率改善が見込めます。</div>
+      </div>
+      <div class="score-row">
+        <div class="score-row-head"><span>SEO</span><span>65</span></div>
+        <div class="score-bar-track"><div class="score-bar-fill" style="width:65%"></div></div>
+        <div class="score-note">titleタグ・meta descriptionの最適化余地あり。構造化データの追加も有効です。</div>
+      </div>
+      <div class="score-row">
+        <div class="score-row-head"><span>モバイル対応</span><span>81</span></div>
+        <div class="score-bar-track"><div class="score-bar-fill" style="width:81%"></div></div>
+        <div class="score-note">レスポンシブ対応は概ね良好。タップ領域のサイズ調整で更に改善できます。</div>
+      </div>
+      <div class="score-row">
+        <div class="score-row-head"><span>集客導線</span><span>58</span></div>
+        <div class="score-bar-track"><div class="score-bar-fill" style="width:58%"></div></div>
+        <div class="score-note">問い合わせボタンの視認性・配置位置に改善余地あり。CVR向上のポイントです。</div>
+      </div>
+      <div class="score-row">
+        <div class="score-row-head"><span>信頼性</span><span>76</span></div>
+        <div class="score-bar-track"><div class="score-bar-fill" style="width:76%"></div></div>
+        <div class="score-note">実績・お客様の声の掲載で、初訪問者の安心感をさらに高められます。</div>
+      </div>
+
+      <div class="sample-warning">▼ これはサンプル表示です（実際のあなたのサイトの診断ではありません）</div>
+
+      <div class="report-cta">
+        入力いただいた <strong style="color:var(--text)">${escapeHtml(url)}</strong> の詳しい診断レポート（具体的な改善提案つき）は、<strong style="color:var(--accent)">無料でお送りします</strong>。<br><br>
+        <button class="demo-btn" onclick="goToContactWithUrl()">無料診断レポートを受け取る</button>
+      </div>
+    `;
+    btn.disabled = false;
+  }, 1500);
+}
+
+function goToContactWithUrl() {
+  const contactUrlInput = document.getElementById('contactSiteUrl');
+  if (contactUrlInput) contactUrlInput.value = lastCheckedUrl;
+  scrollToContact();
+}
+
+// Contact form (Web3Forms — mail delivery only, not an AI API)
+async function submitContactForm(e) {
+  e.preventDefault();
+  const form = document.getElementById('contactForm');
+  const status = document.getElementById('contactFormStatus');
+  const btn = document.getElementById('contactSubmitBtn');
+
+  btn.disabled = true;
+  status.className = 'form-status';
+  status.textContent = '送信中...';
+
   try {
-    const res = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: "claude-sonnet-4-20250514",
-        max_tokens: 600,
-        system: `あなたは業務自動化の専門家です。業種とお困りごとを受け取り、以下の形式でコンパクトに回答してください。日本語で、簡潔に。
-
-【自動化の提案】
-- 何を自動化するか（1〜2行）
-
-【使用技術】
-- 具体的なツール・技術名を列挙
-
-【期待効果】
-- 削減できる工数や改善内容
-
-【実装の難易度】
-★〜★★★★★で表示し、一言コメント
-
-全体で200字以内にまとめてください。`,
-        messages: [{
-          role: "user",
-          content: `業種：${bizType}\nお困りごと：${painType}\n\nこの業務の自動化提案をしてください。`
-        }]
-      })
+    const res = await fetch('https://api.web3forms.com/submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify(Object.fromEntries(new FormData(form)))
     });
-
     const data = await res.json();
-    const text = data.content?.[0]?.text || "提案を生成できませんでした。";
-    output.className = 'demo-output';
-    output.textContent = text;
-  } catch (e) {
-    output.className = 'demo-output';
-    output.textContent = '※ デモ実行にはAPI接続が必要です。\n\n【サンプル回答】\n【自動化の提案】\n受注データをGASで自動集計し、Slackへ日次レポートを配信。\n\n【使用技術】\nGoogle Apps Script / Spreadsheet / Slack API\n\n【期待効果】\n毎日30分のレポート作業がゼロに。\n\n【実装の難易度】\n★★☆☆☆ — 2〜3日で実装可能';
+
+    if (data.success) {
+      status.className = 'form-status success';
+      status.textContent = '送信しました。24時間以内にご連絡します。';
+      form.reset();
+    } else {
+      throw new Error(data.message || 'send failed');
+    }
+  } catch (err) {
+    status.className = 'form-status error';
+    status.textContent = '送信できませんでした。お手数ですが、クラウドワークス経由でご連絡ください。';
   }
 
   btn.disabled = false;
+  return false;
 }
 
 // Scramble animation

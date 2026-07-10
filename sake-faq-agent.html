@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>蔵内ナレッジアシスタント | 松井酒造 業務FAQ</title>
+<title>蔵内ナレッジアシスタント | 星霜酒造 業務FAQ（デモ）</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;600;700&family=IBM+Plex+Mono:wght@300;400;500&family=Noto+Sans+JP:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
@@ -498,6 +498,7 @@
   /* ===== RESPONSIVE ===== */
   @media (max-width: 640px) {
     .sidebar { display: none; }
+    .demo-badge { display: none; }
   }
 </style>
 </head>
@@ -513,6 +514,7 @@
     </div>
   </div>
   <div class="header-right">
+    <div class="status-badge demo-badge" style="color: rgba(255,255,255,0.4);">デモ／サンプルデータ（架空の蔵元）</div>
     <div class="status-badge">
       <div class="status-dot"></div>
       AI稼働中
@@ -809,16 +811,16 @@ ${JSON.stringify(ALL_FAQ, null, 2)}
 - 絵文字は使わない（業務用なので）
 - 敬語・丁寧語で回答`;
 
-  const res = await fetch("https://api.anthropic.com/v1/messages", {
+  const res = await fetch("/api/faq", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      model: "claude-sonnet-4-20250514",
-      max_tokens: 600,
       system: systemPrompt,
       messages: [{ role: "user", content: userMsg }]
     })
   });
+
+  if (!res.ok) throw new Error(`API error: ${res.status}`);
 
   const data = await res.json();
   return data.content?.[0]?.text || "回答を生成できませんでした。";
