@@ -5,7 +5,7 @@
 const FETCH_TIMEOUT_MS = 8000;   // 対象サイト取得のタイムアウト
 const MAX_BYTES = 150 * 1024;    // 対象サイトHTMLの読み取り上限（先頭〜150KB）
 const EXCERPT_CHARS = 4000;      // Claudeに渡すHTML冒頭抜粋の文字数
-const USER_AGENT = 'Mozilla/5.0 (compatible; AlnairDiagnoseBot/1.0; +https://alnair-hp.vercel.app/)';
+const USER_AGENT = 'Mozilla/5.0 (compatible; AlnairDiagnoseBot/1.0; +https://alnair-hp.netlify.app/)';
 
 export default async function handler(req, res) {
   // CORS headers
