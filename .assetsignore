@@ -1,0 +1,13 @@
+.git
+.gitignore
+.assetsignore
+worker.js
+wrangler.jsonc
+vercel.json
+package.json
+package-lock.json
+node_modules
+api
+.vercel
+.env
+.env.*

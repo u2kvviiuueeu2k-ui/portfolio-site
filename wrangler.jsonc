@@ -1,0 +1,12 @@
+{
+  "name": "portfolio-site",
+  "main": "worker.js",
+  "compatibility_date": "2026-08-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "account_id": "ccc605624906c4ea0e7990154c932396",
+  "assets": {
+    "directory": ".",
+    "binding": "ASSETS",
+    "html_handling": "auto-trailing-slash"
+  }
+}
