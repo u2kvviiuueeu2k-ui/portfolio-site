@@ -8,5 +8,11 @@
     "directory": ".",
     "binding": "ASSETS",
     "html_handling": "auto-trailing-slash"
-  }
+  },
+  "kv_namespaces": [
+    {
+      "binding": "RATE_LIMIT",
+      "id": "43ab5a642be3434180916df059631e0b"
+    }
+  ]
 }

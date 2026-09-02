@@ -13,6 +13,60 @@ const ROUTES = {
   '/api/diagnose': diagnoseHandler,
 };
 
+// ==== アクセス制御 ====
+// 公開デモのため、外部サイトからの直接利用と過剰な連打を防ぐ。
+const ALLOWED_ORIGIN_HOSTS = [
+  'portfolio-site.webprod-alnair.workers.dev',
+];
+
+const DAILY_LIMIT = 5;
+
+function isAllowedOrigin(request) {
+  const origin = request.headers.get('origin');
+  const referer = request.headers.get('referer');
+  const source = origin || referer;
+
+  // ブラウザ以外（curl等）からの直接呼び出しは Origin も Referer も付かない
+  if (!source) return false;
+
+  try {
+    return ALLOWED_ORIGIN_HOSTS.includes(new URL(source).hostname);
+  } catch {
+    return false;
+  }
+}
+
+function clientKey(request) {
+  const ip =
+    request.headers.get('cf-connecting-ip') ||
+    request.headers.get('x-forwarded-for') ||
+    'unknown';
+  const day = new Date().toISOString().slice(0, 10);
+  return `demo:${day}:${ip}`;
+}
+
+// 上限を超えていれば 429 を返す。超えていなければカウントを進めて null を返す。
+async function enforceDailyLimit(request, env) {
+  if (!env.RATE_LIMIT) return null; // KV未設定時は素通し（ローカル開発用）
+
+  const key = clientKey(request);
+  const current = parseInt((await env.RATE_LIMIT.get(key)) || '0', 10);
+
+  if (current >= DAILY_LIMIT) {
+    return jsonResponse(
+      {
+        error: `デモの1日あたりの利用上限（${DAILY_LIMIT}回）に達しました。導入のご相談は運営までお問い合わせください。`,
+        limit: DAILY_LIMIT,
+      },
+      429
+    );
+  }
+
+  // 25時間で自動失効（日付が変わればキー自体も変わる）
+  await env.RATE_LIMIT.put(key, String(current + 1), { expirationTtl: 60 * 60 * 25 });
+  return null;
+}
+
 function jsonResponse(data, status) {
   return new Response(JSON.stringify(data), {
     status,
@@ -116,6 +170,16 @@ export default {
       if (typeof value === 'string') {
         globalThis.process.env[key] = value;
       }
+    }
+
+
+    // OPTIONS（CORSプリフライト）は制限対象外
+    if (request.method !== 'OPTIONS') {
+      if (!isAllowedOrigin(request)) {
+        return jsonResponse({ error: 'このAPIはデモサイトからのみ利用できます。' }, 403);
+      }
+      const limited = await enforceDailyLimit(request, env);
+      if (limited) return limited;
     }
 
     const req = await toVercelReq(request);
